@@ -53,17 +53,17 @@ class Matrica:
         #         return False
         print("NOT IMPLEMENTED")
 
-        
+    #NOT IMPLEMENTED!!!!! 
     def __isValidMoveForPawn__(self, pawn: Pawn, x: int, y: int):
         '''Validating move for current pawn'''
-    #     if x < 0 or y < 0: 
-    #         return False
-    #     if abs(pawn.x - x) == 1 and abs(pawn.y - y) == 1:
-    #         return True #move one step diagonally
+        #     if x < 0 or y < 0: 
+        #         return False
+        #     if abs(pawn.x - x) == 1 and abs(pawn.y - y) == 1:
+        #         return True #move one step diagonally
         print("NOT IMPLEMENTED")
         
     def printBoard(self):
-        #refactoring
+        #needs refactoring
         '''Printing current state on the board'''
         print(" ", end="")
         for i in range(0,self.dimY):
@@ -93,7 +93,7 @@ class Matrica:
                     print("=", end=" ")
             print("\n", end="")
 
-
+    #NOT IMPLEMENTED!!!!! 
     def changeStateIfPossible(self, player: Player, pawnNo: int, pawnPositions: List[int],
                                  wallType: int, wallPosition: List[int]) -> bool:
         '''Promena stanja igre ako validnost uspe, ako ne vratiti false'''
@@ -123,8 +123,6 @@ class Matrica:
         player.movePawn(pawnNo, x, y) #pomeranje pijuna u player 
         self.mat[x][y].player = player #nova pozicija
 
-    
-
     def PutWall(self, player: Player, wallType: int,wallPositions: List[int]) -> bool:
         '''WallType == 0 horizontal walls
            WallType == 1 vertical walls
@@ -133,12 +131,12 @@ class Matrica:
         x = wallPositions[0]
         y = wallPositions[1]
         if wallType == 0: 
-            self.mat[x][y].rightWall = True
-            self.mat[x][y+1].rightWall = True
+            self.mat[x][y].bottomWall = True
+            self.mat[x][y+1].bottomWall = True
             player.horWallNum = player.horWallNum - 1
         else:
-            self.mat[x][y].bottomWall = True
-            self.mat[x+1][y].bottomWall = True
+            self.mat[x][y].rightWall = True
+            self.mat[x+1][y].rightWall = True
             player.vertWallNum = player.vertWallNum - 1
 
     def isEndOfGame(self, player: Player):
@@ -153,5 +151,16 @@ class Matrica:
             else:
                 return False
 
-
+mat = Matrica(10,11,[3,3],[4,4],[8,8],[9,9])
+playerX = Player('X',5,5)
+playerO = Player('O',5,5)
+playerX.AddPawns(Pawn([3,3]),Pawn([4,4]))
+playerO.AddPawns(Pawn([8,8]),Pawn([9,9]))
+mat.addPlayers(playerX,playerO)
+print("Prikaz matrice nakon inicijalizacije")
+mat.printBoard()
+mat.movePawn(playerX,1,[1,3])
+mat.PutWall(playerX,0,[4,5])
+print("PlayerX pomerio pesaka na [1,3]")
+mat.printBoard()
 

@@ -3,7 +3,11 @@ class Game:
 
     def __init__(self) :
         self.matrica = None
-        self.onTurn = ""
+        self.onTurn = ''
+        self.players = { 
+            'X' : None,
+            'Y' : None
+        }
     
     def matrixInit(self): 
         '''Creating matrix: dimensions and starting positions for pawns
@@ -40,12 +44,16 @@ class Game:
 
         #adding players to the matrix
         self.matrica.addPlayers(playerX, playerO)
+        self.players['X'] = playerX
+        self.players['O'] = playerO
     
     def printBoard(self):
         '''Printing board on the console'''
         print("Trenutno stanje matrice:", end="\n")
         self.matrica.printBoard() #miljin kod za printing
 
+    #NOT IMPLEMENTED!!!!!
+    #mozda nam ovo i ne treba
     def finishedGame(self):
         '''Prover ad li je neko pobedio'''
         # print(f"Provera da li je player {self.matrica.player1.sign} pobedio")
@@ -53,6 +61,7 @@ class Game:
         # return self.matrica.finished() 
         print("NOT IMPLEMENTED")
 
+    #NOT IMPLEMENTED!!!!!
     def playGame(self):
         '''Zapocni igru, igraju igraci naizmenicno'''
         # while (not_finished): 
@@ -66,6 +75,7 @@ class Game:
 
         print("NOT IMPLEMENTED")
 
+    #NOT IMPLEMENTED!!!!! 
     def computerPlays(self):
         '''kompjuter je na redu da igra'''
         print("NOT IMPLEMENTED")
