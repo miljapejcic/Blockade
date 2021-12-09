@@ -140,6 +140,18 @@ class Matrica:
             self.mat[x][y].bottomWall = True
             self.mat[x+1][y].bottomWall = True
             player.vertWallNum = player.vertWallNum - 1
-    
+
+    def isEndOfGame(self, player: Player):
+        if player.sign == "X":
+            if player.pawn1.checkEnd(self.startPosO1, self.startPos02) or player.pawn2.checkEnd(self.startPosO1, self.startPosO2):
+                return True
+            else:
+                return False
+        elif player.sign == "O":
+            if player.pawn1.checkEnd(self.startPosX1, self.startPosX2) or player.pawn2.checkEnd(self.startPosX1, self.startPosX2):
+                return True
+            else:
+                return False
+
 
 
