@@ -113,7 +113,115 @@ class Matrica:
             self.PutWall(player, wallType, wallPositions)
         print("NOT IMPLEMENTED")
 
-   
+    def validateMove(self, pawn: Pawn, pawnPosition: List[int]) ->bool :
+        nX=pawnPosition[0] #nove koord
+        nY=pawnPosition[1]
+        sX=pawn.x
+        sY=pawn.y
+        if nX < 0 or nX > self.dimX:
+            return False
+        if nY < 0 or nY > self.dimY:
+            return False
+        
+        #Condition 2 - are sum of distances between x and y coordinate greater than 3? 
+        if (abs(pawn.x - nX) + abs(pawn.y - nY)) > 2: 
+            return False
+        
+        if self.mat[nX][nY].player != None:
+            return False
+        #gore
+        if nX-sX==2 and nY==sY :
+            if self.mat[sX-1][sY].bottomWall==True or self.mat[sX-2][sY].bottomWall==True:
+                return False
+                #gore za 1
+        if nX-sX==1 and nY==sY :
+            if self.mat[sX-1][sY].bottomWall==True or self.mat[sX-2][sY].bottomWall==True:
+                return False
+            if self.mat[sX-2][sY].player==None:
+                return False
+        #dole
+        if sX-nX==2 and nY==sY:
+            if self.mat[sX][sY].bottomWall==True or self.mat[sX+1][sY].bottomWall==True:
+                return False
+            #dole za 1
+        if sX-nX==1 and nY==sY:
+            if self.mat[sX][sY].bottomWall==True or self.mat[sX+1][sY].bottomWall==True:
+                return False
+            if self.mat[sX+2][sY].player==None:
+                return False
+        #desno
+        if nY-sY==2 and nX==sX:
+            if self.mat[sX][sY].rightWall==True or self.mat[sX][sY+1].rightWall==True:
+                return False
+            #desno za 1
+        if nY-sY==1 and nX==sX:
+            if self.mat[sX][sY].rightWall==True or self.mat[sX][sY+1].rightWall==True:
+                return False
+            if self.mat[sX][sY+2].player==None:
+                return False
+        #levo
+        if sY-nY==2 and nX==sX:
+            if self.mat[sX][sY-1].rightWall==True or self.mat[sX][sY-2].rightWall==True:
+                return False
+            #levo za 1
+        if sY-nY==1 and nX==sX:
+            if self.mat[sX][sY-1].rightWall==True or self.mat[sX][sY-2].rightWall==True:
+                return False
+            if self.mat[sX][sY-1].player==None:
+                return False
+        #dij levo gore
+        if nX==sX-1 and nY==sY-1 :
+            if self.mat[sX][sY+1].bottomWall==True and self.mat[nX][nY].bottomWall==True:
+                return False
+            elif self.mat[sX][sY-1].rightWall==True and self.mat[sX-1][sY-1].rightWall==True:
+                return False
+        #dij levo dole
+        if nX==sX+1 and nY==sY-1:
+            if self.mat[sX][sY].bottomWall==True and self.mat[sX][sY-1].bottomWall==True:
+                return False
+            elif self.mat[sX][sY-1].rightWall==True and self.mat[sX+1][sY-1].rightWall==True:
+                return False
+        #dij desno gore
+        if nX==sX-1 and nY==sY+1:
+            if self.mat[sX][sY].rightWall==True and self.mat[sX-1][sY].rightWall==True:
+                return False
+            if self.mat[sX][sY].bottomWall==True and self.mat[sX-1][sY+1].bottomWall==True:
+                return False
+        #dij desno dole
+        if nX==sX+1 and nY==sY+1:
+            if self.mat[sX][sY].rightWall==True and self.mat[sX+1][sY].rightWall==True:
+                return False
+            if self.mat[sX][sY].bottomWall==True and self.mat[sX][sY+1].bottomWall==True:
+                return False
+
+        return True
+
+    def validateWall(self, wallType: int,wallPositions: List[int]) -> bool:
+        '''WallType == 0 horizontal walls
+           WallType == 1 vertical walls
+        '''
+        zX=wallPositions[0]
+        zY=wallPositions[1]
+
+        if wallType ==0:
+            #zid izvan tabele  
+            if(zX>self.dimX and zY>self.dimY) or (zX>self.dimX and zY+1>self.dimY):
+                return False
+            #horizontalni zid da li se poklapa sa drugim
+            if self.mat[zX][zY].bottomWall==True or self.mat[zX][zY+1].bottomWall==True:
+                return False 
+        else:
+            #zid izvan tabele    
+            if (zX>self.dimX and zY>self.dimY) or (zX+1>self.dimX and zY>self.dimY):
+                return False
+            #vertikalni zid da li se poklapa sa drugim
+            if self.mat[zX][zY].rightWall==True or self.mat[zX+1][zY].rightWall==True:
+                return False
+        
+        return True
+
+
+
     def movePawn(self, player: Player ,pawnNo: int, pawnPositions: List[int]) -> bool:
         '''Pomeranje igraca na x,y celiji u matrici
            pawnNo == 1 => pawn1 
@@ -128,7 +236,7 @@ class Matrica:
         self.mat[pawn.x][pawn.y].player = None #brisanje sa stare lokacije
         player.movePawn(pawnNo, x, y) #pomeranje pijuna u player 
         self.mat[x][y].player = player #nova pozicija
-
+    
     def PutWall(self, player: Player, wallType: int,wallPositions: List[int]) -> bool:
         '''WallType == 0 horizontal walls
            WallType == 1 vertical walls
