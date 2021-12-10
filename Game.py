@@ -66,6 +66,7 @@ class Game:
         '''Zapocni igru, igraju igraci naizmenicno'''
         # while (not_finished): 
         #     sadaIgra = self.onTurn
+                #player = self.players[sadaIgra]
         # ako je moj potez igram
         # ako nije PCplays()
         #prompt (gde hoces da se pomeris, smer)

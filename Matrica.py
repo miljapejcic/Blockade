@@ -47,20 +47,26 @@ class Matrica:
     
 
     #NOT IMPLEMENTED!!!!! 
-    def isValidMove(self, player: Player, x: int, y: int) -> bool:
-        '''Validating move for current player to the positions x and y'''
-        #     if x < 0 or y < 0:
-        #         return False
+    def isValidMove(self, player: Player, pawnNo: int, x: int, y: int) -> bool:
+        '''Validating move for current player and its choosen pawn to the positions x and y'''
+        #Condition 1 - are x and y inside the matrix? 
+        if x < 0 or x > self.dimX:
+            return False
+        if y < 0 or y > self.dimY:
+            return False
+        
+        #Condition 2 - are sum of distances between x and y coordinate greater than 3? 
+        pawn = player.getPawn(pawnNo)
+        if (abs(pawn.x - x) + abs(pawn.y - y)) > 2: 
+            return False
+        
+        #Condition 3 - are there walls between current pawn's location and desired location? 
+        #problem ne znam kako da usmerim "pogled" pesaku prema cilju
+        #da ne bismo proveravali sva 8 smera, treba nekako odrediti kuda da se pesak uputi
+        # i onda da se na tom putu proveri da li ima zidova, i prepreka
         print("NOT IMPLEMENTED")
 
-    #NOT IMPLEMENTED!!!!! 
-    def __isValidMoveForPawn__(self, pawn: Pawn, x: int, y: int):
-        '''Validating move for current pawn'''
-        #     if x < 0 or y < 0: 
-        #         return False
-        #     if abs(pawn.x - x) == 1 and abs(pawn.y - y) == 1:
-        #         return True #move one step diagonally
-        print("NOT IMPLEMENTED")
+
         
     def printBoard(self):
         #needs refactoring
@@ -95,7 +101,7 @@ class Matrica:
 
     #NOT IMPLEMENTED!!!!! 
     def changeStateIfPossible(self, player: Player, pawnNo: int, pawnPositions: List[int],
-                                 wallType: int, wallPosition: List[int]) -> bool:
+                                 wallType: int, wallPositions: List[int]) -> bool:
         '''Promena stanja igre ako validnost uspe, ako ne vratiti false'''
         #valid funkcija za igraca
         #valid funkcija za zid
@@ -104,7 +110,7 @@ class Matrica:
         #movePawn
         self.movePawn(player, pawnNo,pawnPositions)
         if  player.hasWalls(wallType):
-            self.PutWall(player, wallType, wallPosition)
+            self.PutWall(player, wallType, wallPositions)
         print("NOT IMPLEMENTED")
 
    
