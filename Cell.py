@@ -12,7 +12,7 @@ class Cell:
         self.bottomWall = bottomWall
 
     def hasPlayer(self) -> bool:
-        return self.player == None
+        return self.player != None
 
     
         
