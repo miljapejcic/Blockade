@@ -93,7 +93,7 @@ class Matrica:
                                  wallType: int, wallPositions: List[int]) -> bool:
         '''Promena stanja igre ako validnost uspe, ako ne vratiti false'''
 
-        validMove = self.validateMove(player.getPawn(pawnNo), pawnPositions)
+        validMove = self.validateMove(player,pawnNo, pawnPositions)
         validWall = self.validateWall(wallType, wallPositions)
         validString  = "invalid move" if not validMove else "invalid wall" 
         if validMove and validWall:
@@ -105,13 +105,14 @@ class Matrica:
     def changeStateWithoutWalls(self, player: Player, pawnNo: int, pawnPositions: List[int]) -> bool:
         '''Promena stanja igre ako validnost uspe, ako ne vratiti false'''
 
-        if self.validateMove(player.getPawn(pawnNo), pawnPositions):
+        if self.validateMove(player,pawnNo, pawnPositions):
             return self.movePawn(player, pawnNo,pawnPositions)
         else:
             return False
 
 
-    def validateMove(self, pawn: Pawn, pawnPosition: List[int]) ->bool :
+    def validateMove(self, player:Player,pawnNo: int, pawnPosition: List[int]) ->bool :
+        pawn=player.getPawn(pawnNo)
         nX=pawnPosition[0] #nove koord
         nY=pawnPosition[1]
         sX=pawn.x
@@ -125,7 +126,14 @@ class Matrica:
         if (abs(pawn.x - nX) + abs(pawn.y - nY)) > 2: 
             return False
         
+
         if self.mat[nX][nY].player != None:
+            if player.sign=='X':
+                if self.startPosO1==pawnPosition or self.startPosO2==pawnPosition:
+                    return True
+            if player.sign=='O':
+                if self.startPosX1==pawnPosition or self.startPosX2==pawnPosition:
+                    return True
             return False
         #gore
         if sX-nX==2 and nY==sY :

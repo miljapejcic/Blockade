@@ -16,7 +16,7 @@ class Game:
     def matrixInit(self): 
         '''Creating matrix: dimensions and starting positions for pawns
            Starting positions for pawns are target for other player's pawns'''
-        #dimenzije
+        #dimenzije3
         dimX = int(input("Uneti broj vrsta table: "))        
         dimY = int(input("Uneti broj koloni table: "))
         
@@ -74,7 +74,6 @@ class Game:
                 winner = currentPlayer
                 break
         print(f"Igra je zavrsena.\nPobednik je: {winner.sign}", end="\n")
-        self.printBoard()
 
     
     def playTurn(self, player: Player) -> Player: 
