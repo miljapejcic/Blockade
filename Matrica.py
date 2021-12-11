@@ -4,10 +4,15 @@ from Player import *
 from Pawn import *
 class Matrica: 
     
+    '''Za pomeranje levo-desno se menja y koordinata
+       Za pomeranje gore-dole se menja x koordinata'''
+
     def __init__(self, dimX: int, dimY: 
                 int, x1: List[int], x2: List[int],
                 o1: List[int], o2: List[int]):
-        ''' x1 - starting positions for pawn1 of playerX (x,y)
+        ''' dimX - broj vrsta matrice
+            dimY - broj kolona matrice
+            x1 - starting positions for pawn1 of playerX (x,y)
             x2 - starting positions for pawn2 of playerX (x,y)
             o1 - starting positions for pawn1 of playerO (x,y)
             o1 - starting positions for pawn2 of playerO (x,y)'''
@@ -20,7 +25,7 @@ class Matrica:
         self.startPosX2 = x2
         self.startPosO1 = o1
         self.startPosO2 = o2
-        self.mat = self.__make_matrix__() #radi li ?? 
+        self.mat = self.__make_matrix__()
         
 
     def __make_matrix__(self):
@@ -44,29 +49,6 @@ class Matrica:
         self.mat[playerO.pawn2.x][playerO.pawn2.y].player = playerO
 
 
-    
-
-    #NOT IMPLEMENTED!!!!! 
-    def isValidMove(self, player: Player, pawnNo: int, x: int, y: int) -> bool:
-        '''Validating move for current player and its choosen pawn to the positions x and y'''
-        #Condition 1 - are x and y inside the matrix? 
-        if x < 0 or x > self.dimX:
-            return False
-        if y < 0 or y > self.dimY:
-            return False
-        
-        #Condition 2 - are sum of distances between x and y coordinate greater than 3? 
-        pawn = player.getPawn(pawnNo)
-        if (abs(pawn.x - x) + abs(pawn.y - y)) > 2: 
-            return False
-        
-        #Condition 3 - are there walls between current pawn's location and desired location? 
-        #problem ne znam kako da usmerim "pogled" pesaku prema cilju
-        #da ne bismo proveravali sva 8 smera, treba nekako odrediti kuda da se pesak uputi
-        # i onda da se na tom putu proveri da li ima zidova, i prepreka
-        print("NOT IMPLEMENTED")
-
-
         
     def printBoard(self):
         #needs refactoring
@@ -80,7 +62,6 @@ class Matrica:
         print("\n", end="")
         for i in range(0,self.dimX):
             print(f'{hex(i)[2:]}{chr(0x01C1)}', end="")
-            # print("{} {}".format(chr(0x01C1)), end="")
             for j in range(0,self.dimY):
                 #if i,j neki od startnih pozicija ? "S"
                 if self.mat[i][j].hasPlayer():
@@ -100,18 +81,26 @@ class Matrica:
             print("\n", end="")
 
     #NOT IMPLEMENTED!!!!! 
-    def changeStateIfPossible(self, player: Player, pawnNo: int, pawnPositions: List[int],
+    def changeStateWithWalls(self, player: Player, pawnNo: int, pawnPositions: List[int],
                                  wallType: int, wallPositions: List[int]) -> bool:
         '''Promena stanja igre ako validnost uspe, ako ne vratiti false'''
-        #valid funkcija za igraca
-        #valid funkcija za zid
-        #return false ako ne moze
+
+        validMove = self.validateMove(player.getPawn(pawnNo), pawnPositions)
+        validWall = self.validateWall(wallType, wallPositions)
+
+        if validMove and validWall:
+            return self.movePawn(player, pawnNo,pawnPositions) and self.PutWall(player, wallType, wallPositions)
+        else:
+            return False;
         
-        #movePawn
-        self.movePawn(player, pawnNo,pawnPositions)
-        if  player.hasWalls(wallType):
-            self.PutWall(player, wallType, wallPositions)
-        print("NOT IMPLEMENTED")
+    def changeStateWithoutWalls(self, player: Player, pawnNo: int, pawnPositions: List[int]) -> bool:
+        '''Promena stanja igre ako validnost uspe, ako ne vratiti false'''
+
+        if self.validateMove(player.getPawn(pawnNo), pawnPositions):
+            return self.movePawn(player, pawnNo,pawnPositions)
+        else:
+            return False;
+
 
     def validateMove(self, pawn: Pawn, pawnPosition: List[int]) ->bool :
         nX=pawnPosition[0] #nove koord
@@ -236,24 +225,28 @@ class Matrica:
         self.mat[pawn.x][pawn.y].player = None #brisanje sa stare lokacije
         player.movePawn(pawnNo, x, y) #pomeranje pijuna u player 
         self.mat[x][y].player = player #nova pozicija
+        return True
     
     def PutWall(self, player: Player, wallType: int,wallPositions: List[int]) -> bool:
         '''WallType == 0 horizontal walls
            WallType == 1 vertical walls
            Validnost je vec okej'''
-
+        if wallType not in range[0,1]:
+            return False
         x = wallPositions[0]
         y = wallPositions[1]
         if wallType == 0: 
             self.mat[x][y].bottomWall = True
             self.mat[x][y+1].bottomWall = True
             player.horWallNum = player.horWallNum - 1
+            return True
         else:
             self.mat[x][y].rightWall = True
             self.mat[x+1][y].rightWall = True
             player.vertWallNum = player.vertWallNum - 1
+            return True
 
-    def isEndOfGame(self, player: Player):
+    def isEndOfGame(self, player: Player) -> bool:
         if player.sign == "X":
             if player.pawn1.checkEnd(self.startPosO1, self.startPos02) or player.pawn2.checkEnd(self.startPosO1, self.startPosO2):
                 return True

@@ -6,8 +6,9 @@ class Game:
         self.onTurn = ''
         self.players = { 
             'X' : None,
-            'Y' : None
+            'O' : None
         }
+        self.temp = None
     
     def matrixInit(self): 
         '''Creating matrix: dimensions and starting positions for pawns
@@ -54,16 +55,21 @@ class Game:
 
     #NOT IMPLEMENTED!!!!!
     #mozda nam ovo i ne treba
-    def finishedGame(self):
-        '''Prover ad li je neko pobedio'''
-        # print(f"Provera da li je player {self.matrica.player1.sign} pobedio")
-        # if self.matrica.finished()
-        # return self.matrica.finished() 
-        print("NOT IMPLEMENTED")
+    def finishedGame(self, player: Player):
+        '''Provera da li je neko pobedio'''
 
+        return self.matrica.isEndOfGame(player)
+ 
     #NOT IMPLEMENTED!!!!!
     def playGame(self):
         '''Zapocni igru, igraju igraci naizmenicno'''
+
+        while True:
+            currentPlayer = self.playTurn(self.players(self.onTurn))
+            self.onTurn = 'X' if self.onTurn == 'O' else 'O'
+            if self.finishedGame(currentPlayer):
+                break
+
         # while (not_finished): 
         #     sadaIgra = self.onTurn
                 #player = self.players[sadaIgra]
@@ -74,7 +80,6 @@ class Game:
         #pomeri igraca
         #kraj runde => onTurn menja vrednost
 
-        print("NOT IMPLEMENTED")
 
     #NOT IMPLEMENTED!!!!! 
     def computerPlays(self):
