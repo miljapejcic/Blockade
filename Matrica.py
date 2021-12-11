@@ -51,7 +51,6 @@ class Matrica:
 
         
     def printBoard(self):
-        #needs refactoring
         '''Printing current state on the board'''
         print(" ", end="")
         for i in range(0,self.dimY):
@@ -90,18 +89,18 @@ class Matrica:
             return ' '
          
 
-    #NOT IMPLEMENTED!!!!! 
     def changeStateWithWalls(self, player: Player, pawnNo: int, pawnPositions: List[int],
                                  wallType: int, wallPositions: List[int]) -> bool:
         '''Promena stanja igre ako validnost uspe, ako ne vratiti false'''
 
         validMove = self.validateMove(player.getPawn(pawnNo), pawnPositions)
         validWall = self.validateWall(wallType, wallPositions)
-
+        validString  = "invalid move" if not validMove else "invalid wall" 
         if validMove and validWall:
             return self.movePawn(player, pawnNo,pawnPositions) and self.PutWall(player, wallType, wallPositions)
         else:
-            return False;
+            print(validString)
+            return False
         
     def changeStateWithoutWalls(self, player: Player, pawnNo: int, pawnPositions: List[int]) -> bool:
         '''Promena stanja igre ako validnost uspe, ako ne vratiti false'''
@@ -109,7 +108,7 @@ class Matrica:
         if self.validateMove(player.getPawn(pawnNo), pawnPositions):
             return self.movePawn(player, pawnNo,pawnPositions)
         else:
-            return False;
+            return False
 
 
     def validateMove(self, pawn: Pawn, pawnPosition: List[int]) ->bool :
@@ -129,21 +128,21 @@ class Matrica:
         if self.mat[nX][nY].player != None:
             return False
         #gore
-        if nX-sX==2 and nY==sY :
+        if sX-nX==2 and nY==sY :
             if self.mat[sX-1][sY].bottomWall==True or self.mat[sX-2][sY].bottomWall==True:
                 return False
-                #gore za 1
-        if nX-sX==1 and nY==sY :
+            #gore za 1
+        if sX-nX==1 and nY==sY :
             if self.mat[sX-1][sY].bottomWall==True or self.mat[sX-2][sY].bottomWall==True:
                 return False
             if self.mat[sX-2][sY].player==None:
                 return False
         #dole
-        if sX-nX==2 and nY==sY:
+        if nX-sX==2 and nY==sY:
             if self.mat[sX][sY].bottomWall==True or self.mat[sX+1][sY].bottomWall==True:
                 return False
             #dole za 1
-        if sX-nX==1 and nY==sY:
+        if nX-sX==1 and nY==sY:
             if self.mat[sX][sY].bottomWall==True or self.mat[sX+1][sY].bottomWall==True:
                 return False
             if self.mat[sX+2][sY].player==None:
@@ -174,11 +173,15 @@ class Matrica:
                 return False
             elif self.mat[sX][sY-1].rightWall==True and self.mat[sX-1][sY-1].rightWall==True:
                 return False
+            elif self.mat[nX][nY].rightWall==True and self.mat[nX][nY].bottomWall==True:
+                return False
         #dij levo dole
         if nX==sX+1 and nY==sY-1:
             if self.mat[sX][sY].bottomWall==True and self.mat[sX][sY-1].bottomWall==True:
                 return False
             elif self.mat[sX][sY-1].rightWall==True and self.mat[sX+1][sY-1].rightWall==True:
+                return False
+            elif self.mat[sX][sY-1].bottomWall==True and self.mat[nX][nY].rightWall==True:
                 return False
         #dij desno gore
         if nX==sX-1 and nY==sY+1:
@@ -186,13 +189,16 @@ class Matrica:
                 return False
             if self.mat[sX][sY].bottomWall==True and self.mat[sX-1][sY+1].bottomWall==True:
                 return False
+            elif self.mat[sX-1][sY].rightWall==True and self.mat[nX][nY].bottomWall==True:
+                return False
         #dij desno dole
         if nX==sX+1 and nY==sY+1:
             if self.mat[sX][sY].rightWall==True and self.mat[sX+1][sY].rightWall==True:
                 return False
             if self.mat[sX][sY].bottomWall==True and self.mat[sX][sY+1].bottomWall==True:
                 return False
-
+            elif self.mat[sX][sY+1].bottomWall==True and self.mat[sX+1][sY].rightWall==True:
+                return False
         return True
 
     def validateWall(self, wallType: int,wallPositions: List[int]) -> bool:
@@ -258,7 +264,7 @@ class Matrica:
 
     def isEndOfGame(self, player: Player) -> bool:
         if player.sign == "X":
-            if player.pawn1.checkEnd(self.startPosO1, self.startPos02) or player.pawn2.checkEnd(self.startPosO1, self.startPosO2):
+            if player.pawn1.checkEnd(self.startPosO1, self.startPosO2) or player.pawn2.checkEnd(self.startPosO1, self.startPosO2):
                 return True
             else:
                 return False
@@ -267,34 +273,4 @@ class Matrica:
                 return True
             else:
                 return False
-
-#provera da li nam rade validacije i kod iz matrice 
-mat = Matrica(10,11,[3,3],[4,4],[8,8],[9,9])
-walls = 5
-playerX = Player('X',walls)
-playerO = Player('O',walls)
-playerX.AddPawns(Pawn([3,3]),Pawn([4,4]))
-playerO.AddPawns(Pawn([8,8]),Pawn([9,9]))
-mat.addPlayers(playerX,playerO)
-print("Prikaz matrice nakon inicijalizacije")
-mat.printBoard()
-if mat.changeStateWithWalls(playerX,1,[1,3],0,[4,5]):
-# mat.movePawn(playerX,1,[1,3])
-# mat.PutWall(playerX,0,[4,5])
-    print("PlayerX pomerio pesaka na [1,3] i postavio horizontalni zid na [4,5]")
-else : 
-    print("PlayerX izabrao lose polje za pesaka ili za zid")
-
-print("Nakon promene stanja na tabli")
-mat.printBoard()
-
-if mat.changeStateWithWalls(playerO,1,[1,3],0,[4,5]):
-# mat.movePawn(playerX,1,[1,3])
-# mat.PutWall(playerX,0,[4,5])
-    print("PlayerX pomerio pesaka na [1,3] i postavio horizontalni zid na [4,5]")
-else : 
-    print("PlayerX izabrao lose polje za pesaka ili za zid")
-
-print("Nakon promene stanja na tabli")
-mat.printBoard()
 

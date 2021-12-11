@@ -3,7 +3,7 @@ class Game:
 
     def __init__(self) :
         self.matrica = None
-        self.onTurn = ''
+        self.onTurn = 'X'
         self.players = { 
             'X' : None,
             'O' : None
@@ -61,10 +61,10 @@ class Game:
         '''Provera da li je player pobedio'''
         return self.matrica.isEndOfGame(player)
  
-    #NOT TESTED !! 
     def playGame(self):
         '''Zapocni igru, igraju igraci naizmenicno'''
         winner = None #Player()
+        self.printBoard() 
         while True:
             currentPlayer = self.playTurn(self.players[self.onTurn])
             self.printBoard() #prints board after each turn
@@ -77,27 +77,28 @@ class Game:
         self.printBoard()
 
     
-    #NOT TESTED !! 
     def playTurn(self, player: Player) -> Player: 
         '''Player (Human or Computer) plays the turns'''
         #prvo cemo da napravimo da radi PvP
         moveDone = False
+        print(f"Trenutno igra {player.sign} \n")
         while (not moveDone):
-            pawnNo = int(input("Izaberi pesaka: 1 ili 2"))
-            [x,y] = input("Unesite nove pozicije pesaka: (pozX,pozY)").split(',')
+            pawnNo = int(input("Izaberi pesaka: 1 ili 2: "))
+            [x,y] = input("Unesite nove pozicije pesaka: (pozX,pozY): ").split(',')
             pawnPositions = [int(x), int(y)]
-            if player.hasWalls(): 
-                wallType = int(input("Unesite tip zida: Horizontalni = 1 Vertikalni = 2"))
-                [wallX,wallY] = input("Unesite nove pozicije zida: (pozX,pozY)").split(',')
-                wallPositions = [int(wallX), int(wallY)]
-                if self.matrica.changeStateWithWalls(player,pawnNo,pawnPositions,wallType,wallPositions):
-                    print("Pozicija pesaka ili pozicija zida nije validna") #malo srediti ovaj print
+            if player.hasAnyWalls(): 
+                wallType = int(input("Unesite tip zida: Horizontalni = 0 Vertikalni = 1 : "))
+                if player.hasWalls(wallType):
+                    [wallX,wallY] = input("Unesite nove pozicije zida: (pozX,pozY): ").split(',')
+                    wallPositions = [int(wallX), int(wallY)]
+                    if self.matrica.changeStateWithWalls(player,pawnNo,pawnPositions,wallType,wallPositions):
+                        self.printMove(player,pawnNo)
+                        self.printWall(player,wallType,wallPositions)
+                        moveDone = True        
                 else: 
-                    self.printMove(player,pawnNo)
-                    self.printWall(player,wallType,wallPositions)
-                    moveDone = True
+                    print("Nemate trazeni zid")
             else: 
-                if self.matrica.changeStateWithoutWalls(player,pawnNo,pawnPositions):
+                if not self.matrica.changeStateWithoutWalls(player,pawnNo,pawnPositions):
                     print("Pozicija pesaka nije dozvoljena")
                 else: 
                     self.printMove(player,pawnNo)
@@ -126,3 +127,4 @@ class Game:
     
 game = Game()
 game.matrixInit()
+game.playGame()
