@@ -1,11 +1,13 @@
 from Pawn import *
 class Player: 
-    def __init__(self, sign: str, vertWallNum: int, horWallNum: int) :
-        self.vertWallNum = vertWallNum
-        self.horWallNum = horWallNum
+    def __init__(self, sign: str, wallNums: int ):
+        #isHuman: bool - parametar 
+        self.vertWallNum = wallNums
+        self.horWallNum = wallNums
         self.pawn1 = None
         self.pawn2 = None
         self.sign = sign
+        #self.human = isHuman #stavio sam izmenu na oba mesta videcemo gde cemo da je ubacimo
 
     def AddPawns(self, pawn1: Pawn, pawn2: Pawn) -> bool:
         '''Setting pawns for player. Player must have two pawns '''
@@ -28,6 +30,8 @@ class Player:
    
 
     def getPawn(self, pawnNo: int) -> Pawn:
+        '''PawnNo == 1 => prvi pesak
+           PawnNo == 2 => drugi pesak'''
         if pawnNo == 1:
             return self.pawn1
         else:

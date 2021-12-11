@@ -14,6 +14,5 @@ class Cell:
     def hasPlayer(self) -> bool:
         return self.player == None
 
-#dodat komentar 
     
         

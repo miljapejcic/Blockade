@@ -8,6 +8,9 @@ class Game:
             'X' : None,
             'O' : None
         }
+        #Mozda treba da obelezimo ko ce da bude PC a ko covek
+        #Ili ove ili unutar player-a kao atribut 
+        #self.Computer = 'X' or 'Y', kada se izabere ko igra prvi
         self.temp = None
     
     def matrixInit(self): 
@@ -34,57 +37,90 @@ class Game:
         #prvi igrac X 
         pawn1 = Pawn(player1_pawn1)
         pawn2 = Pawn(player1_pawn2)
-        playerX = Player("X",wallNums,wallNums)
-        playerX.AddPawns(pawn1,pawn2)
+        local_playerX = Player("X",wallNums)
+        local_playerX.AddPawns(pawn1,pawn2)
         
         #drugi igrac O
         pawn1 = Pawn(player2_pawn1)
         pawn2 = Pawn(player2_pawn2)
-        playerO = Player("O",wallNums,wallNums)
-        playerO.AddPawns(pawn1,pawn2)
+        local_playerO = Player("O",wallNums)
+        local_playerO.AddPawns(pawn1,pawn2)
 
         #adding players to the matrix
-        self.matrica.addPlayers(playerX, playerO)
-        self.players['X'] = playerX
-        self.players['O'] = playerO
+        self.matrica.addPlayers(local_playerX, local_playerO)
+        self.players['X'] = local_playerX
+        self.players['O'] = local_playerO
     
     def printBoard(self):
         '''Printing board on the console'''
         print("Trenutno stanje matrice:", end="\n")
-        self.matrica.printBoard() #miljin kod za printing
+        self.matrica.printBoard() 
 
-    #NOT IMPLEMENTED!!!!!
-    #mozda nam ovo i ne treba
-    def finishedGame(self, player: Player):
-        '''Provera da li je neko pobedio'''
-
+    
+    def isFinishedGame(self, player: Player) -> bool:
+        '''Provera da li je player pobedio'''
         return self.matrica.isEndOfGame(player)
  
-    #NOT IMPLEMENTED!!!!!
+    #NOT TESTED !! 
     def playGame(self):
         '''Zapocni igru, igraju igraci naizmenicno'''
-
+        winner = None #Player()
         while True:
-            currentPlayer = self.playTurn(self.players(self.onTurn))
+            currentPlayer = self.playTurn(self.players[self.onTurn])
+            self.printBoard() #prints board after each turn
+            #change whose turn is next
             self.onTurn = 'X' if self.onTurn == 'O' else 'O'
-            if self.finishedGame(currentPlayer):
+            if self.isFinishedGame(currentPlayer):
+                winner = currentPlayer
                 break
+        print(f"Igra je zavrsena.\nPobednik je: {winner.sign}", end="\n")
+        self.printBoard()
 
-        # while (not_finished): 
-        #     sadaIgra = self.onTurn
-                #player = self.players[sadaIgra]
-        # ako je moj potez igram
-        # ako nije PCplays()
-        #prompt (gde hoces da se pomeris, smer)
-        #proveri potezz
-        #pomeri igraca
-        #kraj runde => onTurn menja vrednost
+    
+    #NOT TESTED !! 
+    def playTurn(self, player: Player) -> Player: 
+        '''Player (Human or Computer) plays the turns'''
+        #prvo cemo da napravimo da radi PvP
+        moveDone = False
+        while (not moveDone):
+            pawnNo = int(input("Izaberi pesaka: 1 ili 2"))
+            [x,y] = input("Unesite nove pozicije pesaka: (pozX,pozY)").split(',')
+            pawnPositions = [int(x), int(y)]
+            if player.hasWalls(): 
+                wallType = int(input("Unesite tip zida: Horizontalni = 1 Vertikalni = 2"))
+                [wallX,wallY] = input("Unesite nove pozicije zida: (pozX,pozY)").split(',')
+                wallPositions = [int(wallX), int(wallY)]
+                if self.matrica.changeStateWithWalls(player,pawnNo,pawnPositions,wallType,wallPositions):
+                    print("Pozicija pesaka ili pozicija zida nije validna") #malo srediti ovaj print
+                else: 
+                    self.printMove(player,pawnNo)
+                    self.printWall(player,wallType,wallPositions)
+                    moveDone = True
+            else: 
+                if self.matrica.changeStateWithoutWalls(player,pawnNo,pawnPositions):
+                    print("Pozicija pesaka nije dozvoljena")
+                else: 
+                    self.printMove(player,pawnNo)
+                    moveDone = True
+        return player
+
+    def printMove(self, player: Player, pawnNo: int):
+        pawn = player.getPawn(pawnNo)
+        print(f"Igrac {player.sign} je odigrao potez pesakom: {pawnNo} na poziciju [{pawn.x},{pawn.y}]")
+    
+    def printWall(self, player: Player, wallType: int, wallPositions: List[int]):
+        '''WallType == 1 horizontal walls
+           walltype == 2 vertical walls'''
+        x = wallPositions[0]
+        y = wallPositions[1]
+        # betweenFields = [(x,y),(x,y+1),(x+1,y),(x+1,y+1)] #radi i za vertikalne i horizontalne zidove
+        tipZida = "horizontalni" if wallType == 2 else "vertikalni" 
+        print(f"Igrac {player.sign} je postavio zid {tipZida} izmedju polja [({x},{y}),({x},{y+1}),({x+1},{y}),({x+1},{y+1})]")
+
+        
 
 
-    #NOT IMPLEMENTED!!!!! 
-    def computerPlays(self):
-        '''kompjuter je na redu da igra'''
-        print("NOT IMPLEMENTED")
+   
 
 
     

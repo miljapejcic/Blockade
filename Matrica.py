@@ -231,7 +231,7 @@ class Matrica:
         '''WallType == 0 horizontal walls
            WallType == 1 vertical walls
            Validnost je vec okej'''
-        if wallType not in range[0,1]:
+        if wallType not in [0,1]:
             return False
         x = wallPositions[0]
         y = wallPositions[1]
@@ -258,16 +258,33 @@ class Matrica:
             else:
                 return False
 
+#provera da li nam rade validacije i kod iz matrice 
 mat = Matrica(10,11,[3,3],[4,4],[8,8],[9,9])
-playerX = Player('X',5,5)
-playerO = Player('O',5,5)
+walls = 5
+playerX = Player('X',walls)
+playerO = Player('O',walls)
 playerX.AddPawns(Pawn([3,3]),Pawn([4,4]))
 playerO.AddPawns(Pawn([8,8]),Pawn([9,9]))
 mat.addPlayers(playerX,playerO)
 print("Prikaz matrice nakon inicijalizacije")
 mat.printBoard()
-mat.movePawn(playerX,1,[1,3])
-mat.PutWall(playerX,0,[4,5])
-print("PlayerX pomerio pesaka na [1,3]")
+if mat.changeStateWithWalls(playerX,1,[1,3],0,[4,5]):
+# mat.movePawn(playerX,1,[1,3])
+# mat.PutWall(playerX,0,[4,5])
+    print("PlayerX pomerio pesaka na [1,3] i postavio horizontalni zid na [4,5]")
+else : 
+    print("PlayerX izabrao lose polje za pesaka ili za zid")
+
+print("Nakon promene stanja na tabli")
+mat.printBoard()
+
+if mat.changeStateWithWalls(playerO,1,[1,3],0,[4,5]):
+# mat.movePawn(playerX,1,[1,3])
+# mat.PutWall(playerX,0,[4,5])
+    print("PlayerX pomerio pesaka na [1,3] i postavio horizontalni zid na [4,5]")
+else : 
+    print("PlayerX izabrao lose polje za pesaka ili za zid")
+
+print("Nakon promene stanja na tabli")
 mat.printBoard()
 
