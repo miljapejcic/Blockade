@@ -62,12 +62,13 @@ class Matrica:
         print("\n", end="")
         for i in range(0,self.dimX):
             print(f'{hex(i)[2:]}{chr(0x01C1)}', end="")
-            for j in range(0,self.dimY):
-                #if i,j neki od startnih pozicija ? "S"
-                if self.mat[i][j].hasPlayer():
-                    print(" ", end="")
+            for j in range(0,self.dimY):  
+                if self.checkGoal(i, j) != ' ' and not self.mat[i][j].hasPlayer():
+                    print(self.checkGoal(i,j), end="")
+                elif self.mat[i][j].hasPlayer():
+                   print(self.mat[i][j].player.sign , end="")
                 else:
-                    print(self.mat[i][j].player.sign , end="") #overwrite "S"
+                    print(" ", end="")
                 if self.mat[i][j].rightWall == False:
                     print("|", end="")
                 else:
@@ -79,6 +80,15 @@ class Matrica:
                 else:
                     print("=", end=" ")
             print("\n", end="")
+
+    def checkGoal(self, i: int, j: int):
+        if (i == self.startPosO1[0] and j == self.startPosO1[1]) or (i == self.startPosO2[0] and j == self.startPosO2[1]):
+            return 'o'
+        elif (i == self.startPosX1[0] and j == self.startPosX1[1]) or (i == self.startPosX2[0] and j == self.startPosX2[1]):
+            return 'x'
+        else:
+            return ' '
+         
 
     #NOT IMPLEMENTED!!!!! 
     def changeStateWithWalls(self, player: Player, pawnNo: int, pawnPositions: List[int],
