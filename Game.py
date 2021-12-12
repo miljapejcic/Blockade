@@ -95,10 +95,10 @@ class Game:
                         self.printWall(player,wallType,wallPositions)
                         moveDone = True        
                 else: 
-                    print("Nemate trazeni zid")
+                    print("Nemate trazeni tip zida")
             else: 
                 if not self.matrica.changeStateWithoutWalls(player,pawnNo,pawnPositions):
-                    print("Pozicija pesaka nije dozvoljena")
+                    print("Pozicija pesaka nije dozvoljena") #OVAJ IF TREBA ANALIZIRATI
                 else: 
                     self.printMove(player,pawnNo)
                     moveDone = True
@@ -109,12 +109,12 @@ class Game:
         print(f"Igrac {player.sign} je odigrao potez pesakom: {pawnNo} na poziciju [{pawn.x},{pawn.y}]")
     
     def printWall(self, player: Player, wallType: int, wallPositions: List[int]):
-        '''WallType == 1 horizontal walls
-           walltype == 2 vertical walls'''
+        '''WallType == 0 horizontal walls
+           walltype == 1 vertical walls'''
         x = wallPositions[0]
         y = wallPositions[1]
         # betweenFields = [(x,y),(x,y+1),(x+1,y),(x+1,y+1)] #radi i za vertikalne i horizontalne zidove
-        tipZida = "horizontalni" if wallType == 2 else "vertikalni" 
+        tipZida = "horizontalni" if wallType == 0 else "vertikalni" 
         print(f"Igrac {player.sign} je postavio zid {tipZida} izmedju polja [({x},{y}),({x},{y+1}),({x+1},{y}),({x+1},{y+1})]")
 
 

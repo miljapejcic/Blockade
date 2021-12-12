@@ -26,7 +26,7 @@ class Player:
         return False
 
     def hasAnyWalls(self)->bool:
-        return self.hasWalls(0) and self.hasWalls(1)
+        return self.hasWalls(0) or self.hasWalls(1)
    
 
     def getPawn(self, pawnNo: int) -> Pawn:

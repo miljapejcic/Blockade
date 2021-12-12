@@ -127,7 +127,7 @@ class Matrica:
             return False
         
 
-        if self.mat[nX][nY].player != None:
+        if self.mat[nX][nY].player != None or self.checkGoal(nX, nY) in ['o','x']:
             if player.sign=='X':
                 if self.startPosO1==pawnPosition or self.startPosO2==pawnPosition:
                     return True
