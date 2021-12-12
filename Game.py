@@ -16,7 +16,7 @@ class Game:
     def matrixInit(self): 
         '''Creating matrix: dimensions and starting positions for pawns
            Starting positions for pawns are target for other player's pawns'''
-        #dimenzije3
+        #dimenzije
         dimX = int(input("Uneti broj vrsta table: "))        
         dimY = int(input("Uneti broj koloni table: "))
         
@@ -116,11 +116,6 @@ class Game:
         # betweenFields = [(x,y),(x,y+1),(x+1,y),(x+1,y+1)] #radi i za vertikalne i horizontalne zidove
         tipZida = "horizontalni" if wallType == 2 else "vertikalni" 
         print(f"Igrac {player.sign} je postavio zid {tipZida} izmedju polja [({x},{y}),({x},{y+1}),({x+1},{y}),({x+1},{y+1})]")
-
-        
-
-
-   
 
 
     
