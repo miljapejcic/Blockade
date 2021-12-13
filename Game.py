@@ -122,3 +122,4 @@ class Game:
 game = Game()
 game.matrixInit()
 game.playGame()
+#test komentar u moving&validating grani 
