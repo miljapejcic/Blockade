@@ -17,3 +17,10 @@ class Pawn:
             return True
         else:
             return False
+    def getCopy(self):
+        '''Copy constructor'''
+        pawn = Pawn([self.x, self.y])
+        return pawn
+    
+    def getPositions(self) -> List[int]:
+        return [self.x,self.y]

@@ -83,21 +83,25 @@ class Game:
         print(f"Trenutno igra {player.sign} \n")
         while (not moveDone):
             pawnNo = int(input("Izaberi pesaka: 1 ili 2: "))
-            [x,y] = input("Unesite nove pozicije pesaka: (pozX,pozY): ").split(',')
-            pawnPositions = [int(x), int(y)]
+            print("Moguce napraviti samo dva koraka")
+            print("\nX-osa (vrste): -2,-1,0,1,2\nY-osa (kolone): -2,-1,0,1,2")
+        
+            [xDir,yDir] = input("Unesite pravce kretanja:" ).split(',')
+            xDir = int(xDir)
+            yDir = int(yDir)
             if player.hasAnyWalls(): 
                 wallType = int(input("Unesite tip zida: Horizontalni = 0 Vertikalni = 1 : "))
                 if player.hasWalls(wallType):
                     [wallX,wallY] = input("Unesite nove pozicije zida: (pozX,pozY): ").split(',')
                     wallPositions = [int(wallX), int(wallY)]
-                    if self.matrica.changeStateWithWalls(player,pawnNo,pawnPositions,wallType,wallPositions):
+                    if self.matrica.changeStateWithWalls(player,pawnNo,xDir,yDir,wallType,wallPositions):
                         self.printMove(player,pawnNo)
                         self.printWall(player,wallType,wallPositions)
                         moveDone = True        
                 else: 
                     print("Nemate trazeni tip zida")
             else: 
-                if not self.matrica.changeStateWithoutWalls(player,pawnNo,pawnPositions):
+                if not self.matrica.changeStateWithoutWalls(player,pawnNo,xDir,yDir):
                     print("Pozicija pesaka nije dozvoljena") #OVAJ IF TREBA ANALIZIRATI
                 else: 
                     self.printMove(player,pawnNo)

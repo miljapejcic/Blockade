@@ -1,4 +1,4 @@
-from typing import List
+from typing import ContextManager, List
 from Cell import *
 from Player import *
 from Pawn import *
@@ -89,125 +89,29 @@ class Matrica:
             return ' '
          
 
-    def changeStateWithWalls(self, player: Player, pawnNo: int, pawnPositions: List[int],
-                                 wallType: int, wallPositions: List[int]) -> bool:
+    def changeStateWithWalls(self, player: Player, pawnNo: int, xDir: int, yDir: int,                                 wallType: int, wallPositions: List[int]) -> bool:
         '''Promena stanja igre ako validnost uspe, ako ne vratiti false'''
 
-        validMove = self.validateMove(player,pawnNo, pawnPositions)
+        validMove = self.validateMove(player,pawnNo,xDir,yDir)
         validWall = self.validateWall(wallType, wallPositions)
         validString  = "invalid move" if not validMove else "invalid wall" 
         if validMove and validWall:
-            return self.movePawn(player, pawnNo,pawnPositions) and self.PutWall(player, wallType, wallPositions)
+            pawn = player.getPawn(pawnNo)
+            return self.movePawn(player, pawnNo, [pawn.x + xDir, pawn.y + yDir]) and self.PutWall(player, wallType, wallPositions)
         else:
             print(validString)
             return False
         
-    def changeStateWithoutWalls(self, player: Player, pawnNo: int, pawnPositions: List[int]) -> bool:
+    def changeStateWithoutWalls(self, player: Player, pawnNo: int, xDir: int, yDir: int) -> bool:
         '''Promena stanja igre ako validnost uspe, ako ne vratiti false'''
 
-        if self.validateMove(player,pawnNo, pawnPositions):
-            return self.movePawn(player, pawnNo,pawnPositions)
+        if self.validateMove(player,pawnNo,xDir,yDir):
+            pawn = player.getPawn(pawnNo)
+            return self.movePawn(player, pawnNo,[pawn.x + xDir, pawn.y + yDir])
         else:
             return False
 
 
-    def validateMove(self, player:Player,pawnNo: int, pawnPosition: List[int]) ->bool :
-        pawn=player.getPawn(pawnNo)
-        nX=pawnPosition[0] #nove koord
-        nY=pawnPosition[1]
-        sX=pawn.x
-        sY=pawn.y
-        if nX < 0 or nX > self.dimX:
-            return False
-        if nY < 0 or nY > self.dimY:
-            return False
-        
-        #Condition 2 - are sum of distances between x and y coordinate greater than 3? 
-        if (abs(pawn.x - nX) + abs(pawn.y - nY)) > 2: 
-            return False
-        
-
-        if self.mat[nX][nY].player != None or self.checkGoal(nX, nY) in ['o','x']:
-            if player.sign=='X':
-                if self.startPosO1==pawnPosition or self.startPosO2==pawnPosition:
-                    return True
-            if player.sign=='O':
-                if self.startPosX1==pawnPosition or self.startPosX2==pawnPosition:
-                    return True
-            return False
-        #gore
-        if sX-nX==2 and nY==sY :
-            if self.mat[sX-1][sY].bottomWall==True or self.mat[sX-2][sY].bottomWall==True:
-                return False
-            #gore za 1
-        if sX-nX==1 and nY==sY :
-            if self.mat[sX-1][sY].bottomWall==True or self.mat[sX-2][sY].bottomWall==True:
-                return False
-            if self.mat[sX-2][sY].player==None:
-                return False
-        #dole
-        if nX-sX==2 and nY==sY:
-            if self.mat[sX][sY].bottomWall==True or self.mat[sX+1][sY].bottomWall==True:
-                return False
-            #dole za 1
-        if nX-sX==1 and nY==sY:
-            if self.mat[sX][sY].bottomWall==True or self.mat[sX+1][sY].bottomWall==True:
-                return False
-            if self.mat[sX+2][sY].player==None:
-                return False
-        #desno
-        if nY-sY==2 and nX==sX:
-            if self.mat[sX][sY].rightWall==True or self.mat[sX][sY+1].rightWall==True:
-                return False
-            #desno za 1
-        if nY-sY==1 and nX==sX:
-            if self.mat[sX][sY].rightWall==True or self.mat[sX][sY+1].rightWall==True:
-                return False
-            if self.mat[sX][sY+2].player==None:
-                return False
-        #levo
-        if sY-nY==2 and nX==sX:
-            if self.mat[sX][sY-1].rightWall==True or self.mat[sX][sY-2].rightWall==True:
-                return False
-            #levo za 1
-        if sY-nY==1 and nX==sX:
-            if self.mat[sX][sY-1].rightWall==True or self.mat[sX][sY-2].rightWall==True:
-                return False
-            if self.mat[sX][sY-1].player==None:
-                return False
-        #dij levo gore
-        if nX==sX-1 and nY==sY-1 :
-            if self.mat[sX][sY+1].bottomWall==True and self.mat[nX][nY].bottomWall==True:
-                return False
-            elif self.mat[sX][sY-1].rightWall==True and self.mat[sX-1][sY-1].rightWall==True:
-                return False
-            elif self.mat[nX][nY].rightWall==True and self.mat[nX][nY].bottomWall==True:
-                return False
-        #dij levo dole
-        if nX==sX+1 and nY==sY-1:
-            if self.mat[sX][sY].bottomWall==True and self.mat[sX][sY-1].bottomWall==True:
-                return False
-            elif self.mat[sX][sY-1].rightWall==True and self.mat[sX+1][sY-1].rightWall==True:
-                return False
-            elif self.mat[sX][sY-1].bottomWall==True and self.mat[nX][nY].rightWall==True:
-                return False
-        #dij desno gore
-        if nX==sX-1 and nY==sY+1:
-            if self.mat[sX][sY].rightWall==True and self.mat[sX-1][sY].rightWall==True:
-                return False
-            if self.mat[sX][sY].bottomWall==True and self.mat[sX-1][sY+1].bottomWall==True:
-                return False
-            elif self.mat[sX-1][sY].rightWall==True and self.mat[nX][nY].bottomWall==True:
-                return False
-        #dij desno dole
-        if nX==sX+1 and nY==sY+1:
-            if self.mat[sX][sY].rightWall==True and self.mat[sX+1][sY].rightWall==True:
-                return False
-            if self.mat[sX][sY].bottomWall==True and self.mat[sX][sY+1].bottomWall==True:
-                return False
-            elif self.mat[sX][sY+1].bottomWall==True and self.mat[sX+1][sY].rightWall==True:
-                return False
-        return True
 
     def validateWall(self, wallType: int,wallPositions: List[int]) -> bool:
         '''WallType == 0 horizontal walls
@@ -282,3 +186,121 @@ class Matrica:
             else:
                 return False
 
+    def validateMove(self, player: Player, pawnNo: int, xDir: int, yDir: int) -> bool: 
+        '''xDir moving in x-dimension (rows) (-2,-1,0,+1,+2)
+           yDir moving in y-dimension (columns) (-2,-1,0,+1,+2)'''
+           
+        #are sum of distances between x and y coordinate greater than 3? 
+        totalSteps = abs(xDir) + abs(yDir)
+        if  totalSteps > 2 or totalSteps == 0:
+            return False
+        pawn = player.getPawn(pawnNo)
+        #is move out of range? 
+        if self.isOutOfRange(pawn.getPositions(),xDir,yDir):
+            return False
+
+        #pomeranje dva polja po jednoj dimenziji ili jedno polje dijagonalno
+        if abs(xDir) == abs(yDir) : #pomeranje dijagonalno
+            return self.validateDiagonalMove(player,pawn.getPositions(),xDir,yDir)  
+        else: #pomeranje po jednoj osi 
+            return self.validateNormalMove(player,pawn.getPositions(),xDir,yDir,totalSteps)
+
+    
+    def validateNormalMove(self,player: Player, pawnPositions: List[int],xDir: int, yDir: int, totalSteps: int) -> bool: 
+        '''For validating moving in one direction one or two steps'''
+        pawn = Pawn(pawnPositions)
+        step = 0
+        if xDir != 0: 
+            step = int(xDir / 2) if totalSteps > 1 else 1 # po X 
+        else: #yDir != 0
+            step = int(yDir / 2)  if totalSteps > 1 else 1 # po Y
+        oldPawn = pawn.getCopy() 
+        nextPawn = pawn.getCopy() 
+        wallsBetween = False
+        for i in range(0,totalSteps):
+            if xDir != 0: 
+                nextPawn.x = oldPawn.x + step
+                wallsBetween = self.areWallsBetwween(oldPawn,nextPawn,step,0)
+            else: #xDir != 0
+                nextPawn.y = oldPawn.y + step
+                wallsBetween = self.areWallsBetwween(oldPawn,nextPawn,0,step)
+            if wallsBetween:
+                return False #vraca false, i na prvi i na drugi zid da naidje
+            oldPawn.x = nextPawn.x
+            oldPawn.y = nextPawn.y
+        return self.canJump(player,pawn.x + xDir, pawn.y + yDir)
+        
+
+    def canJump(self,player: Player, x: int, y: int) -> bool:
+        sign = player.sign.lower()
+        cellSign = self.checkGoal(x,y)
+
+        if self.mat[x][y].player == None: #free position
+            return True
+        else: #some pawn is on that position
+            if cellSign in ['x','o']: #goal position
+                if sign != cellSign: #enemy on that position
+                    return True #can jump 
+                else: 
+                    return False #my pawn on that position
+            return False #cannot jump 
+
+    def validateDiagonalMove(self, player: Player, pawnPositions: List[int], xDir: int, yDir: int) -> bool:
+        '''xDir, yDir can be +1,-1'''
+        pawn = Pawn(pawnPositions)
+        #prvi pristup, prvo menjamo x pa y
+        wallsBetween = False
+        tmpPawn = Pawn([pawn.x + xDir, pawn.y])
+        wallsBetween = self.areWallsBetwween(pawn, tmpPawn,xDir,0)
+        if wallsBetween: 
+            return False
+
+        tmpPawn.y = tmpPawn.y + yDir
+        wallsBetween = self.areWallsBetwween(pawn, tmpPawn,0,yDir)
+        if wallsBetween: 
+            return False        
+        #drugi pristup, prvo menjamo y pa x
+        wallsBetween = False
+        tmpPawn = Pawn([pawn.x, pawn.y + yDir])
+        wallsBetween = self.areWallsBetwween(pawn, tmpPawn,0,yDir)
+        if wallsBetween: 
+            return False 
+
+        tmpPawn.y = tmpPawn.x + xDir
+        wallsBetween = self.areWallsBetwween(pawn, tmpPawn,xDir,0)
+        if wallsBetween: 
+            return False 
+        #provera jel slobodno polje 
+        return self.canJump(player,pawn.x + xDir, pawn.y + yDir)
+
+
+    def areWallsBetwween(self, currentPawn: Pawn, nextPawn: Pawn, xDir: int, yDir: int) -> bool:
+        '''Checking if there is wall between two adjacent cells
+           Up: xDir == -1, yDir == 0
+           Down: xDir == 1, yDir == 0
+           Left: xDir == 0, yDir == -1
+           Right: xDir == 0, yDir == 1'''
+
+        if xDir != 0:
+            if xDir == 1:
+                return self.mat[currentPawn.x][currentPawn.y].bottomWall 
+            else: #xDir == -1
+                return self.mat[nextPawn.x][nextPawn.y].bottomWall 
+        
+        else: #yDir != 0
+            if yDir == 1: 
+                return self.mat[currentPawn.x][currentPawn.y].rightWall 
+            else: #yDir == -1
+                return self.mat[nextPawn.x][nextPawn.y].rightWall 
+                
+
+    def isOutOfRange(self, pawnPositions: List[int], xDir: int, yDir: int) -> bool:
+        '''Checking if move is out of board'''
+        x = pawnPositions[0]
+        y = pawnPositions[1]
+        if x + xDir >= self.dimX or x + xDir < 0:
+            return True
+        if y + yDir >= self.dimY or y + yDir < 0:
+            return True
+        return False
+     

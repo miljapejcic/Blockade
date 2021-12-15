@@ -15,4 +15,3 @@ class Cell:
         return self.player != None
 
     
-        
