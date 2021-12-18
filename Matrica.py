@@ -303,4 +303,3 @@ class Matrica:
         if y + yDir >= self.dimY or y + yDir < 0:
             return True
         return False
-     
