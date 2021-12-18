@@ -251,27 +251,29 @@ class Matrica:
         #prvi pristup, prvo menjamo x pa y
         wallsBetween = False
         tmpPawn = Pawn([pawn.x + xDir, pawn.y])
-        wallsBetween = self.areWallsBetwween(pawn, tmpPawn,xDir,0)
-        if wallsBetween: 
-            return False
+        wallsBetween_X = self.areWallsBetwween(pawn, tmpPawn,xDir,0)
+        
 
         tmpPawn.y = tmpPawn.y + yDir
-        wallsBetween = self.areWallsBetwween(pawn, tmpPawn,0,yDir)
-        if wallsBetween: 
-            return False        
+        wallsBetween_Y = self.areWallsBetwween(pawn, tmpPawn,0,yDir)
+        
+        if wallsBetween_X and wallsBetween_Y: 
+            return self.canJump(player,pawn.x + xDir, pawn.y + yDir):
+
+
         #drugi pristup, prvo menjamo y pa x
-        wallsBetween = False
         tmpPawn = Pawn([pawn.x, pawn.y + yDir])
-        wallsBetween = self.areWallsBetwween(pawn, tmpPawn,0,yDir)
-        if wallsBetween: 
-            return False 
+        wallsBetween_X = self.areWallsBetwween(pawn, tmpPawn,0,yDir)
+       
 
         tmpPawn.y = tmpPawn.x + xDir
-        wallsBetween = self.areWallsBetwween(pawn, tmpPawn,xDir,0)
-        if wallsBetween: 
-            return False 
-        #provera jel slobodno polje 
-        return self.canJump(player,pawn.x + xDir, pawn.y + yDir)
+        wallsBetween_Y = self.areWallsBetwween(pawn, tmpPawn,xDir,0)
+
+        if wallsBetween_X and wallsBetween_Y:
+            #provera jel slobodno polje 
+            return self.canJump(player,pawn.x + xDir, pawn.y + yDir)
+        return False
+
 
 
     def areWallsBetwween(self, currentPawn: Pawn, nextPawn: Pawn, xDir: int, yDir: int) -> bool:
