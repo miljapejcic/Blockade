@@ -211,9 +211,9 @@ class Matrica:
         pawn = Pawn(pawnPositions)
         step = 0
         if xDir != 0: 
-            step = int(xDir / 2) if totalSteps > 1 else 1 # po X 
+            step = int(xDir / 2) if totalSteps > 1 else xDir # po X 
         else: #yDir != 0
-            step = int(yDir / 2)  if totalSteps > 1 else 1 # po Y
+            step = int(yDir / 2)  if totalSteps > 1 else yDir # po Y
         oldPawn = pawn.getCopy() 
         nextPawn = pawn.getCopy() 
         wallsBetween = False
@@ -221,7 +221,7 @@ class Matrica:
             if xDir != 0: 
                 nextPawn.x = oldPawn.x + step
                 wallsBetween = self.areWallsBetwween(oldPawn,nextPawn,step,0)
-            else: #xDir != 0
+            else: #yDir != 0
                 nextPawn.y = oldPawn.y + step
                 wallsBetween = self.areWallsBetwween(oldPawn,nextPawn,0,step)
             if wallsBetween:
@@ -258,7 +258,7 @@ class Matrica:
         wallsBetween_Y = self.areWallsBetwween(pawn, tmpPawn,0,yDir)
         
         if wallsBetween_X and wallsBetween_Y: 
-            return self.canJump(player,pawn.x + xDir, pawn.y + yDir):
+            return self.canJump(player,pawn.x + xDir, pawn.y + yDir)
 
 
         #drugi pristup, prvo menjamo y pa x
