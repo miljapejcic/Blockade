@@ -275,7 +275,7 @@ class Matrica:
         return False
 
 
-
+    #ovo je neki komentar
     def areWallsBetwween(self, currentPawn: Pawn, nextPawn: Pawn, xDir: int, yDir: int) -> bool:
         '''Checking if there is wall between two adjacent cells
            Up: xDir == -1, yDir == 0
