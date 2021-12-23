@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import ContextManager, List
 from Cell import *
 from Player import *
@@ -305,3 +306,6 @@ class Matrica:
         if y + yDir >= self.dimY or y + yDir < 0:
             return True
         return False
+
+    def clone(self):
+        return deepcopy(self)

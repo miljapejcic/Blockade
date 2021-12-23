@@ -121,9 +121,25 @@ class Game:
         tipZida = "horizontalni" if wallType == 0 else "vertikalni" 
         print(f"Igrac {player.sign} je postavio zid {tipZida} izmedju polja [({x},{y}),({x},{y+1}),({x+1},{y}),({x+1},{y+1})]")
 
+    def cloneMatrix(self) -> Matrica:
+        cloneRef = self.matrica
+        print(f'CloneRef id {id(cloneRef)}')
+        print(f'OrgMat id: {id(self.matrica)}')
+        clone =  self.matrica.clone()
+        print(f'CloneMat id: {id(clone)}')
+        print(f'OrgMat_matrica id: {id(self.matrica.mat)}')
+        print(f'CloneMat_matrica id: {id(clone.mat)}')
+        print(f'OrgMat_matrica[0][0] id: {id(self.matrica.mat[0][0])}')
+        print(f'CloneMat_matrica[0][0] id: {id(clone.mat[0][0])}')
+        print(f'OrgMat_matrica[0][0].player id: {id(self.matrica.mat[0][0].player)}')
+        print(f'CloneMat_matrica[0][0].player id: {id(clone.mat[0][0].player)}')
 
+
+        # print(self.matrica)
+        # print(clone)
     
 game = Game()
 game.matrixInit()
-game.playGame()
+matrica = game.cloneMatrix()
+# game.playGame()
 #test komentar u moving&validating grani 
