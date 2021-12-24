@@ -111,6 +111,50 @@ class Matrica:
         else:
             return False
 
+    def isBlocking(self):
+        listOfPos = [self.playerX.getPawn(1).getPositions(), self.playerX.getPawn(2).getPositions(), self.playerO.getPawn(1).getPositions(),
+                     self.playerO.getPawn(2).getPositions(), self.startPosX1, self.startPosX2, self.startPosO1, self.startPosO2]
+        for i in range(0, 8):
+            if self.doesPathExist(listOfPos[i%8], listOfPos[(i+1)%8]) == False:
+                return True
+        return False
+
+    def doesPathExist(self, startPositions: List[int], endPositions: List[int]):
+        solution = [[0 for j in range(self.dimY) for i in range(self.dimX)]]
+        if self.doesPathExistBt(startPositions[0], startPositions[1], endPositions[0], endPositions[1], solution) == False:
+            print("Solution doesn't exist");
+            return False
+
+    def doesPathExistBt(self, x1: int, x2: int, y1: int, y2:int, solution: List[List[int]]):
+        if x1 == x2 and y1 == y2:
+            solution[x1][y1] = 1
+            return True
+        
+        if x1 >= 0 and x1 < self.dimX-1 and y1 >= 0 and y1 < self.dimY-1:
+            if solution[x1][y1] == 1:
+                return False
+            
+            solution[x1][y1] = 1
+
+            if not self.mat[x1][y1].bottomWall:
+                if self.doesPathExistBt(x1 + 1, y1, x2, y2, solution) == True:
+                    return True
+
+            if not self.mat[x1][y1].rightWall:
+                if self.doesPathExistBt(x1, y1 + 1 , x2, y2, solution) == True:
+                    return True
+
+            if not self.mat[x1-1][y1].bottomWall:
+                if self.doesPathExistBt(x1 - 1, y1, x2, y2, solution) == True:
+                    return True
+
+            if not self.mat[x1][y1-1].rightWall:
+                if self.doesPathExistBt(x1, y1 - 1, x2, y2, solution) == True:
+                    return True
+
+            solution[x1][y1] = 0
+            return False
+
 
 
     def validateWall(self, wallType: int,wallPositions: List[int]) -> bool:
@@ -167,11 +211,23 @@ class Matrica:
             self.mat[x][y].bottomWall = True
             self.mat[x][y+1].bottomWall = True
             player.horWallNum = player.horWallNum - 1
+            if self.isBlocking():
+                self.mat[x][y].bottomWall = False
+                self.mat[x][y+1].bottomWall = False
+                player.horWallNum = player.horWallNum + 1
+                print("ne smete da blokirate ciljeve ili pesake")
+                return False
             return True
         else:
             self.mat[x][y].rightWall = True
             self.mat[x+1][y].rightWall = True
             player.vertWallNum = player.vertWallNum - 1
+            if self.isBlocking():
+                self.mat[x][y].rightWall = False
+                self.mat[x+1][y].rightWall = False
+                player.vertWallNum = player.vertWallNum + 1
+                print("ne smete da blokirate ciljeve ili pesake")
+                return False
             return True
 
     def isEndOfGame(self, player: Player) -> bool:
