@@ -84,16 +84,10 @@ class Game:
         print(f"Trenutno igra {player.sign} \n")
         while (not moveDone):
             pawnNo = int(input("Izaberi pesaka: 1 ili 2: "))
-            # self.generateNewStates(player,pawnNo) #ubaceno samo zbog testiranja 
-            # print("Moguce napraviti samo dva koraka")
-            # print("\nX-osa (vrste): -2,-1,0,1,2\nY-osa (kolone): -2,-1,0,1,2")
-            cilj = player.getPawn(pawnNo)
+            tmpP = player.getPawn(pawnNo)
             [x,y] = input("Unesite novu poziciju pesaka: ").split(',')
-            xDir = cilj.getPositions()[0] - int(x)
-            yDir = cilj.getPositions()[1] - int(y)
-            # [xDir,yDir] = input("Unesite pravce kretanja:" ).split(',')
-            # xDir = int(xDir)
-            # yDir = int(yDir)
+            xDir = int(x)-tmpP.getPositions()[0]
+            yDir = int(y)-tmpP.getPositions()[1]
             if player.hasAnyWalls(): 
                 wallType = int(input("Unesite tip zida: Horizontalni = 0 Vertikalni = 1 : "))
                 if player.hasWalls(wallType):
