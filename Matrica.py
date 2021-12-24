@@ -89,7 +89,7 @@ class Matrica:
             return ' '
          
 
-    def changeStateWithWalls(self, player: Player, pawnNo: int, xDir: int, yDir: int,                                 wallType: int, wallPositions: List[int]) -> bool:
+    def changeStateWithWalls(self, player: Player, pawnNo: int, xDir: int, yDir: int, wallType: int, wallPositions: List[int]) -> bool:
         '''Promena stanja igre ako validnost uspe, ako ne vratiti false'''
 
         validMove = self.validateMove(player,pawnNo,xDir,yDir)
@@ -97,7 +97,7 @@ class Matrica:
         validString  = "invalid move" if not validMove else "invalid wall" 
         if validMove and validWall:
             pawn = player.getPawn(pawnNo)
-            return self.movePawn(player, pawnNo, [pawn.x + xDir, pawn.y + yDir]) and self.PutWall(player, wallType, wallPositions)
+            return self.PutWall(player, wallType, wallPositions) and self.movePawn(player, pawnNo, [pawn.x + xDir, pawn.y + yDir])
         else:
             print(validString)
             return False
@@ -120,35 +120,33 @@ class Matrica:
         return False
 
     def doesPathExist(self, startPositions: List[int], endPositions: List[int]):
-        solution = [[0 for j in range(self.dimY) for i in range(self.dimX)]]
-        if self.doesPathExistBt(startPositions[0], startPositions[1], endPositions[0], endPositions[1], solution) == False:
-            print("Solution doesn't exist");
-            return False
+        solution = [[ 0 for i in range(0,self.dimY)] for j in range (0,self.dimX)]
+        return self.doesPathExistBt(startPositions[0], startPositions[1], endPositions[0], endPositions[1], solution)
 
-    def doesPathExistBt(self, x1: int, x2: int, y1: int, y2:int, solution: List[List[int]]):
+    def doesPathExistBt(self, x1: int, y1: int, x2: int, y2:int, solution: List[List[int]]):
         if x1 == x2 and y1 == y2:
             solution[x1][y1] = 1
             return True
         
-        if x1 >= 0 and x1 < self.dimX-1 and y1 >= 0 and y1 < self.dimY-1:
+        if x1 >= 0 and x1 < self.dimX and y1 >= 0 and y1 < self.dimY:
             if solution[x1][y1] == 1:
                 return False
             
             solution[x1][y1] = 1
 
-            if not self.mat[x1][y1].bottomWall:
+            if self.mat[x1][y1].bottomWall == False:
                 if self.doesPathExistBt(x1 + 1, y1, x2, y2, solution) == True:
                     return True
 
-            if not self.mat[x1][y1].rightWall:
+            if self.mat[x1][y1].rightWall == False:
                 if self.doesPathExistBt(x1, y1 + 1 , x2, y2, solution) == True:
                     return True
 
-            if not self.mat[x1-1][y1].bottomWall:
+            if self.mat[x1-1][y1].bottomWall == False:
                 if self.doesPathExistBt(x1 - 1, y1, x2, y2, solution) == True:
                     return True
 
-            if not self.mat[x1][y1-1].rightWall:
+            if self.mat[x1][y1-1].rightWall == False:
                 if self.doesPathExistBt(x1, y1 - 1, x2, y2, solution) == True:
                     return True
 
