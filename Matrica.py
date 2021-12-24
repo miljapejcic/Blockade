@@ -38,6 +38,8 @@ class Matrica:
             self.mat[i][self.dimY - 1].rightWall = True #postvljanje desnog zide zadnje kolone na konstatan zid
         return self.mat
    
+    def getCopy(self) : 
+        pass
     def addPlayers(self,playerX: Player, playerO: Player):
         self.playerX = playerX
         self.playerO = playerO
@@ -209,13 +211,13 @@ class Matrica:
             if totalSteps == 1:
                 canPass2 = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir,2)
                 canPass1 = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir, 1)
-                canJump2 = self.canJump(player,pawn.x + 2*xDir, pawn + 2*yDir)
+                canJump2 = self.canJump(player,pawn.x + 2*xDir, pawn.y + 2*yDir)
                 if canPass2 == True and canPass1 == True :
                     return True if canJump2 == False else False
                 return False                
                 
             canPass = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir,totalSteps)
-            canJump = self.canJump(player,pawn.x + 2*xDir, pawn.y + 2*yDir)
+            canJump = self.canJump(player,pawn.x + xDir, pawn.y + yDir)
             return canPass == True and canJump == True
 
     

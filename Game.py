@@ -1,4 +1,5 @@
 from Matrica import * 
+import itertools
 class Game: 
 
     def __init__(self) :
@@ -83,6 +84,7 @@ class Game:
         print(f"Trenutno igra {player.sign} \n")
         while (not moveDone):
             pawnNo = int(input("Izaberi pesaka: 1 ili 2: "))
+            self.generateNewStates(player,pawnNo)
             # print("Moguce napraviti samo dva koraka")
             # print("\nX-osa (vrste): -2,-1,0,1,2\nY-osa (kolone): -2,-1,0,1,2")
             tmpP = player.getPawn(pawnNo)
@@ -125,24 +127,55 @@ class Game:
         print(f"Igrac {player.sign} je postavio zid {tipZida} izmedju polja [({x},{y}),({x},{y+1}),({x+1},{y}),({x+1},{y+1})]")
 
     def cloneMatrix(self) -> Matrica:
-        cloneRef = self.matrica
-        print(f'CloneRef id {id(cloneRef)}')
-        print(f'OrgMat id: {id(self.matrica)}')
-        clone =  self.matrica.clone()
-        print(f'CloneMat id: {id(clone)}')
-        print(f'OrgMat_matrica id: {id(self.matrica.mat)}')
-        print(f'CloneMat_matrica id: {id(clone.mat)}')
-        print(f'OrgMat_matrica[0][0] id: {id(self.matrica.mat[0][0])}')
-        print(f'CloneMat_matrica[0][0] id: {id(clone.mat[0][0])}')
-        print(f'OrgMat_matrica[0][0].player id: {id(self.matrica.mat[0][0].player)}')
-        print(f'CloneMat_matrica[0][0].player id: {id(clone.mat[0][0].player)}')
+       
+        return   self.matrica.clone()
+       
 
+    def generateMoves(self, player: Player, pawnNo : int)-> List[List[int]]:
+        pawn=player.getPawn(pawnNo)
+        x=pawn.x
+        y=pawn.y
+        potezi= []
+        for i in range(pawn.x-1,pawn.x+2):
+            for j in range(pawn.y-1, pawn.y+2):
+                if not (pawn.x==i and pawn.y==j):
+                    if self.matrica.validateMove(player,pawnNo,i-x,j-y):
+                        potezi.append([i,j])
+        nizX  = [-2,2,0,0]
+        nizY = [0,0,-2,2]
+        for i in range(0,4):
+            if self.matrica.validateMove(player,pawnNo, nizX[i], nizY[i]):
+                potezi.append([x+nizX[i],y+nizY[i]])
+
+        return potezi
+
+    def generateNewStates(self, player : Player, pawnNo)-> List[Matrica]:
+        #generisi validne porteze 
+        #kloniraj matrice map fja 
+        #i odigraj potez map fja 
+        #vrati klon matrice 
+        pawn= player.getPawn(pawnNo)
+        x=pawn.x
+        y=pawn.y
+        validMoves= self.generateMoves(player,pawnNo)
+        clonedMatrice = []
+        # clonedMatrice = list(itertools.repeat(self.cloneMatrix(),len(validMoves)))
+        for i in range(0, len(validMoves)):
+            clonedMatrice.append(self.cloneMatrix())
+            print(id(clonedMatrice[i]))
+            
+        for i in range(0, len(validMoves)):
+            clonedMatrice[i].changeStateWithoutWalls(player,pawnNo,validMoves[i][0] -x, validMoves[i][1]-y)
+
+        return clonedMatrice
+
+            
+        
 
         # print(self.matrica)
         # print(clone)
     
 game = Game()
 game.matrixInit()
-# matrica = game.cloneMatrix()
 game.playGame()
 #test komentar u moving&validating grani 
