@@ -327,7 +327,7 @@ class Matrica:
         tmpPawn = Pawn([pawn.x + xDir, pawn.y])
         wallsBetween_X = self.areWallsBetwween(pawn, tmpPawn,xDir,0)
         
-
+        pawn = tmpPawn
         tmpPawn.y = tmpPawn.y + yDir
         wallsBetween_Y = self.areWallsBetwween(pawn, tmpPawn,0,yDir)
         
@@ -337,12 +337,13 @@ class Matrica:
 
 
         #drugi pristup, prvo menjamo y pa x
+        pawn = Pawn(pawnPositions)
         tmpPawn = Pawn([pawn.x, pawn.y + yDir])
-        wallsBetween_X = self.areWallsBetwween(pawn, tmpPawn,0,yDir)
+        wallsBetween_Y = self.areWallsBetwween(pawn, tmpPawn,0,yDir)
        
-
-        tmpPawn.y = tmpPawn.y + yDir
-        wallsBetween_Y = self.areWallsBetwween(pawn, tmpPawn,xDir,0)
+        pawn = tmpPawn
+        tmpPawn.x = tmpPawn.x + xDir
+        wallsBetween_X = self.areWallsBetwween(pawn, tmpPawn,xDir,0)
 
         if wallsBetween_X == False and wallsBetween_Y == False:
             #provera jel slobodno polje 
