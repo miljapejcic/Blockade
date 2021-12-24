@@ -262,9 +262,15 @@ class Matrica:
             return canPass == True and canJump == True  
         else: #pomeranje po jednoj osi 
             if totalSteps == 1:
-                canPass2 = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir,2)
+                canPass2 = False #default-ne vrednosti
+                canJump2 = True  #default-ne vrednosti
+                if self.isOutOfRange(pawn.getPositions(),2*xDir,2*yDir):
+                    canPass2 = True
+                    canJump2 = False
+                else: 
+                    canPass2 = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir,2)
+                    canJump2 = self.canJump(player,pawn.x + 2*xDir, pawn.y + 2*yDir)
                 canPass1 = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir, 1)
-                canJump2 = self.canJump(player,pawn.x + 2*xDir, pawn.y + 2*yDir)
                 if canPass2 == True and canPass1 == True :
                     return True if canJump2 == False else False
                 return False                
@@ -335,7 +341,7 @@ class Matrica:
         wallsBetween_X = self.areWallsBetwween(pawn, tmpPawn,0,yDir)
        
 
-        tmpPawn.y = tmpPawn.x + xDir
+        tmpPawn.y = tmpPawn.y + yDir
         wallsBetween_Y = self.areWallsBetwween(pawn, tmpPawn,xDir,0)
 
         if wallsBetween_X == False and wallsBetween_Y == False:
