@@ -1,4 +1,4 @@
-from copy import deepcopy
+import copy
 from typing import ContextManager, List
 from Cell import *
 from Player import *
@@ -38,18 +38,17 @@ class Matrica:
             self.mat[i][self.dimY - 1].rightWall = True #postvljanje desnog zide zadnje kolone na konstatan zid
         return self.mat
    
-    def getCopy(self) : 
-        pass
+    
     def addPlayers(self,playerX: Player, playerO: Player):
         self.playerX = playerX
         self.playerO = playerO
 
         #postavljanje na tabli
-        self.mat[playerX.pawn1.x][playerX.pawn1.y].player = playerX
-        self.mat[playerX.pawn2.x][playerX.pawn2.y].player = playerX
+        self.mat[playerX.pawn1.x][playerX.pawn1.y].player = self.playerX
+        self.mat[playerX.pawn2.x][playerX.pawn2.y].player = self.playerX
 
-        self.mat[playerO.pawn1.x][playerO.pawn1.y].player = playerO
-        self.mat[playerO.pawn2.x][playerO.pawn2.y].player = playerO
+        self.mat[playerO.pawn1.x][playerO.pawn1.y].player = self.playerO
+        self.mat[playerO.pawn2.x][playerO.pawn2.y].player = self.playerO
 
 
         
@@ -323,5 +322,6 @@ class Matrica:
             return True
         return False
 
+    
     def clone(self):
-        return deepcopy(self)
+        return copy.deepcopy(self)

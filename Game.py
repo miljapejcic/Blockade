@@ -84,13 +84,13 @@ class Game:
         print(f"Trenutno igra {player.sign} \n")
         while (not moveDone):
             pawnNo = int(input("Izaberi pesaka: 1 ili 2: "))
-            self.generateNewStates(player,pawnNo)
+            # self.generateNewStates(player,pawnNo) #ubaceno samo zbog testiranja 
             # print("Moguce napraviti samo dva koraka")
             # print("\nX-osa (vrste): -2,-1,0,1,2\nY-osa (kolone): -2,-1,0,1,2")
-            tmpP = player.getPawn(pawnNo)
+            cilj = player.getPawn(pawnNo)
             [x,y] = input("Unesite novu poziciju pesaka: ").split(',')
-            xDir = int(x)-tmpP.getPositions()[0]
-            yDir = int(y)-tmpP.getPositions()[1]
+            xDir = cilj.getPositions()[0] - int(x)
+            yDir = cilj.getPositions()[1] - int(y)
             # [xDir,yDir] = input("Unesite pravce kretanja:" ).split(',')
             # xDir = int(xDir)
             # yDir = int(yDir)
@@ -149,6 +149,11 @@ class Game:
 
         return potezi
 
+    def bes(self,player):
+        statesPawn1 = self.generateNewStates(player,1)
+        statesPawn2 = self.generateNewStates(player,2)
+
+
     def generateNewStates(self, player : Player, pawnNo)-> List[Matrica]:
         #generisi validne porteze 
         #kloniraj matrice map fja 
@@ -158,15 +163,21 @@ class Game:
         x=pawn.x
         y=pawn.y
         validMoves= self.generateMoves(player,pawnNo)
+        playersClones = []
         clonedMatrice = []
         # clonedMatrice = list(itertools.repeat(self.cloneMatrix(),len(validMoves)))
         for i in range(0, len(validMoves)):
             clonedMatrice.append(self.cloneMatrix())
-            print(id(clonedMatrice[i]))
+            playersClones.append(copy.deepcopy(player))
+            print(f'Matrica_{i} = {id(clonedMatrice[i])}')
+            clonedMatrice[i].printBoard()
             
         for i in range(0, len(validMoves)):
-            clonedMatrice[i].changeStateWithoutWalls(player,pawnNo,validMoves[i][0] -x, validMoves[i][1]-y)
-
+            clonedMatrice[i].changeStateWithoutWalls(playersClones[i],pawnNo,validMoves[i][0] - x, validMoves[i][1] - y)
+            print(f'Matrica_{i} = {id(clonedMatrice[i])}')
+            clonedMatrice[i].printBoard()
+        print(f'Matrica_ORG = {id(self.matrica)}')
+        self.matrica.printBoard()
         return clonedMatrice
 
             
