@@ -90,7 +90,7 @@ class Matrica:
             return ' '
          
 
-    def changeStateWithWalls(self, player: Player, pawnNo: int, xDir: int, yDir: int,                                 wallType: int, wallPositions: List[int]) -> bool:
+    def changeStateWithWalls(self, player: Player, pawnNo: int, xDir: int, yDir: int, wallType: int, wallPositions: List[int]) -> bool:
         '''Promena stanja igre ako validnost uspe, ako ne vratiti false'''
 
         validMove = self.validateMove(player,pawnNo,xDir,yDir)
@@ -202,9 +202,21 @@ class Matrica:
 
         #pomeranje dva polja po jednoj dimenziji ili jedno polje dijagonalno
         if abs(xDir) == abs(yDir) : #pomeranje dijagonalno
-            return self.validateDiagonalMove(player,pawn.getPositions(),xDir,yDir)  
+            canPass = self.validateDiagonalMove(player,pawn.getPositions(),xDir,yDir)
+            canJump = self.canJump(player,pawn.x + xDir, pawn.y + yDir)
+            return canPass == True and canJump == True  
         else: #pomeranje po jednoj osi 
-            return self.validateNormalMove(player,pawn.getPositions(),xDir,yDir,totalSteps)
+            if totalSteps == 1:
+                canPass2 = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir,2)
+                canPass1 = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir, 1)
+                canJump2 = self.canJump(player,pawn.x + 2*xDir, pawn + 2*yDir)
+                if canPass2 == True and canPass1 == True :
+                    return True if canJump2 == False else False
+                return False                
+                
+            canPass = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir,totalSteps)
+            canJump = self.canJump(player,pawn.x + 2*xDir, pawn.y + 2*yDir)
+            return canPass == True and canJump == True
 
     
     def validateNormalMove(self,player: Player, pawnPositions: List[int],xDir: int, yDir: int, totalSteps: int) -> bool: 
@@ -229,7 +241,7 @@ class Matrica:
                 return False #vraca false, i na prvi i na drugi zid da naidje
             oldPawn.x = nextPawn.x
             oldPawn.y = nextPawn.y
-        return self.canJump(player,pawn.x + xDir, pawn.y + yDir)
+        return True
         
 
     def canJump(self,player: Player, x: int, y: int) -> bool:
@@ -258,8 +270,9 @@ class Matrica:
         tmpPawn.y = tmpPawn.y + yDir
         wallsBetween_Y = self.areWallsBetwween(pawn, tmpPawn,0,yDir)
         
-        if wallsBetween_X and wallsBetween_Y: 
-            return self.canJump(player,pawn.x + xDir, pawn.y + yDir)
+        if wallsBetween_X == False and wallsBetween_Y == False: 
+            return True
+            # return self.canJump(player,pawn.x + xDir, pawn.y + yDir)
 
 
         #drugi pristup, prvo menjamo y pa x
@@ -270,9 +283,10 @@ class Matrica:
         tmpPawn.y = tmpPawn.x + xDir
         wallsBetween_Y = self.areWallsBetwween(pawn, tmpPawn,xDir,0)
 
-        if wallsBetween_X and wallsBetween_Y:
+        if wallsBetween_X == False and wallsBetween_Y == False:
             #provera jel slobodno polje 
-            return self.canJump(player,pawn.x + xDir, pawn.y + yDir)
+            return True
+            # return self.canJump(player,pawn.x + xDir, pawn.y + yDir)
         return False
 
 
