@@ -68,7 +68,7 @@ class Game:
         self.printBoard() 
         while True:
             currentPlayer = self.playTurn(self.players[self.onTurn])
-            self.printBoard() #prints board after each turn
+            # self.printBoard() #prints board after each turn
             #change whose turn is next
             self.onTurn = 'X' if self.onTurn == 'O' else 'O'
             if self.isFinishedGame(currentPlayer):
@@ -80,31 +80,45 @@ class Game:
     def playTurn(self, player: Player) -> Player: 
         '''Player (Human or Computer) plays the turns'''
         #prvo cemo da napravimo da radi PvP
-        moveDone = False
+        # moveDone = False
         print(f"Trenutno igra {player.sign} \n")
-        while (not moveDone):
-            pawnNo = int(input("Izaberi pesaka: 1 ili 2: "))
+
+        movePawnDone = False
+        while not movePawnDone:
+            pawnNo = int(input("Izaberi pesaka(1 ili 2): "))
+            if pawnNo not in [1,2]:
+                print("Nevalidan broj pesaka!")
+                continue
             tmpP = player.getPawn(pawnNo)
             [x,y] = input("Unesite novu poziciju pesaka: ").split(',')
             xDir = int(x)-tmpP.getPositions()[0]
             yDir = int(y)-tmpP.getPositions()[1]
-            if player.hasAnyWalls(): 
-                wallType = int(input("Unesite tip zida: Horizontalni = 0 Vertikalni = 1 : "))
+            if self.matrica.validateMove(player, pawnNo, xDir, yDir):
+                pawn = player.getPawn(pawnNo)
+                if self.matrica.movePawn(player, pawnNo, [pawn.x + xDir, pawn.y + yDir]):
+                    movePawnDone = True
+                    self.printMove(player, pawnNo)
+                    self.printBoard()
+            else:
+                print("Nevalidan skok, pokusajte ponovo!")
+
+        if player.hasAnyWalls(): 
+            putWallDone = False
+            while not putWallDone:
+                wallType = int(input("Unesite tip zida (Horizontalni = 0 Vertikalni = 1): "))
+                if wallType not in [0,1]:
+                    print("Nevalidan tip zida!")
+                    continue
                 if player.hasWalls(wallType):
                     [wallX,wallY] = input("Unesite nove pozicije zida: (pozX,pozY): ").split(',')
                     wallPositions = [int(wallX), int(wallY)]
-                    if self.matrica.changeStateWithWalls(player,pawnNo,xDir,yDir,wallType,wallPositions):
-                        self.printMove(player,pawnNo)
-                        self.printWall(player,wallType,wallPositions)
-                        moveDone = True        
-                else: 
-                    print("Nemate trazeni tip zida")
-            else: 
-                if not self.matrica.changeStateWithoutWalls(player,pawnNo,xDir,yDir):
-                    print("Pozicija pesaka nije dozvoljena") #OVAJ IF TREBA ANALIZIRATI
-                else: 
-                    self.printMove(player,pawnNo)
-                    moveDone = True
+                    if self.matrica.validateWall(wallType, wallPositions):
+                        if self.matrica.PutWall(player, wallType, wallPositions):
+                            self.printWall(player,wallType,wallPositions)
+                            self.printBoard()
+                            putWallDone = True
+                else:     
+                    print("Nemate trazeni tip zida!")
         return player
 
     def printMove(self, player: Player, pawnNo: int):
