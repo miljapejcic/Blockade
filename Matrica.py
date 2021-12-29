@@ -272,9 +272,13 @@ class Matrica:
                     canJump2 = self.canJump(player,pawn.x + 2*xDir, pawn.y + 2*yDir)
                 canPass1 = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir, 1)
                 if canPass2 == True and canPass1 == True :
-                    return True if canJump2 == False else False
+                    if canJump2 == False:
+                        return  self.canJump(player, pawn.x + xDir, pawn.y + yDir)
+                    else: 
+                        return False
+                    # return True if canJump2 == False else False
                 return False                
-                
+            #total steps = 24    
             canPass = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir,totalSteps)
             canJump = self.canJump(player,pawn.x + xDir, pawn.y + yDir)
             return canPass == True and canJump == True

@@ -82,7 +82,7 @@ class Game:
         #prvo cemo da napravimo da radi PvP
         # moveDone = False
         print(f"Trenutno igra {player.sign} \n")
-
+        self.bes(player)
         movePawnDone = False
         while not movePawnDone:
             pawnNo = int(input("Izaberi pesaka(1 ili 2): "))
@@ -163,30 +163,81 @@ class Game:
 
 
     def generateNewStates(self, player : Player, pawnNo)-> List[Matrica]:
+        ''' Funckija vraca sve validna stanja za jednog pesaka'''
         #generisi validne porteze 
         #kloniraj matrice map fja 
         #i odigraj potez map fja 
         #vrati klon matrice 
+
         pawn= player.getPawn(pawnNo)
         x=pawn.x
         y=pawn.y
         validMoves= self.generateMoves(player,pawnNo)
         playersClones = []
         clonedMatrice = []
-        # clonedMatrice = list(itertools.repeat(self.cloneMatrix(),len(validMoves)))
+        matriceNewState =[]
         for i in range(0, len(validMoves)):
             clonedMatrice.append(self.cloneMatrix())
             playersClones.append(copy.deepcopy(player))
-            print(f'Matrica_{i} = {id(clonedMatrice[i])}')
-            clonedMatrice[i].printBoard()
-            
         for i in range(0, len(validMoves)):
-            clonedMatrice[i].changeStateWithoutWalls(playersClones[i],pawnNo,validMoves[i][0] - x, validMoves[i][1] - y)
+            clonedMatrice[i].movePawn(playersClones[i],pawnNo,validMoves[i])
             print(f'Matrica_{i} = {id(clonedMatrice[i])}')
-            clonedMatrice[i].printBoard()
-        print(f'Matrica_ORG = {id(self.matrica)}')
-        self.matrica.printBoard()
-        return clonedMatrice
+            clonedMatrice[i].printBoard()   
+        #ako nema zidova    
+        if not player.hasAnyWalls():            
+            return clonedMatrice
+                #print(f'Matrica_{i} = {id(clonedMatrice[i])}')
+                #clonedMatrice[i].printBoard()
+        #ako ima zidova
+        for ind in range(0,len(clonedMatrice)):
+            mat=clonedMatrice[ind]
+            for i in range(0,mat.dimX-1):
+                for j in range(0,mat.dimY-1):
+                    def addMatrix(mat: Matrica, i,j,wallType,player, matriceNewState):
+                        if mat.validateWall(wallType, [i,j]):
+                            tmp = mat.clone()
+                            tr= tmp.PutWall(player,wallType,[i,j])
+                            if tr:
+                                matriceNewState.append(tmp)
+                                print(f'Matrica_{i} = {id(tmp)}')
+                                tmp.printBoard()
+                    naruto = copy.deepcopy(player)
+                    if playersClones[ind].hasWalls(0):
+                        addMatrix(mat,i,j,0,naruto,matriceNewState)
+                        # if mat.validateWall(0, [i,j]):
+                        #     tmp = mat.clone()
+                        #     tr= tmp.PutWall(playersClones[ind],0,[i,j])
+                        #     if tr:
+                        #         matriceNewState.append(tmp)
+                    if playersClones[ind].hasWalls(1):
+                        addMatrix(mat,i,j,1,naruto,matriceNewState)
+
+                        # if mat.validateWall(1, [i,j]):
+                        #     tmp = mat.clone()
+                        #     tr= tmp.PutWall(playersClones[ind],1,[i,j])
+                        #     if tr:
+                        #         matriceNewState.append(tmp)
+        return matriceNewState        
+
+
+        
+
+        # #print(f'Matrica_ORG = {id(self.matrica)}')
+        # # clonedMatrice = list(itertools.repeat(self.cloneMatrix(),len(validMoves)))
+        # for i in range(0, len(validMoves)):
+        #     clonedMatrice.append(self.cloneMatrix())
+        #     playersClones.append(copy.deepcopy(player))
+        #     print(f'Matrica_{i} = {id(clonedMatrice[i])}')
+        #     clonedMatrice[i].printBoard()
+        
+            
+        # for i in range(0, len(validMoves)):
+        #     clonedMatrice[i].changeStateWithoutWalls(playersClones[i],pawnNo,validMoves[i][0] - x, validMoves[i][1] - y)
+        #     print(f'Matrica_{i} = {id(clonedMatrice[i])}')
+        #     clonedMatrice[i].printBoard()
+        # print(f'Matrica_ORG = {id(self.matrica)}')
+        # self.matrica.printBoard()
+        # return matriceNewState
 
             
         
