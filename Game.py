@@ -82,7 +82,7 @@ class Game:
         #prvo cemo da napravimo da radi PvP
         # moveDone = False
         print(f"Trenutno igra {player.sign} \n")
-        self.bes(player)
+        self.generateNewStates(player)
         movePawnDone = False
         while not movePawnDone:
             pawnNo = int(input("Izaberi pesaka(1 ili 2): "))
@@ -157,12 +157,12 @@ class Game:
 
         return potezi
 
-    def bes(self,player):
-        statesPawn1 = self.generateNewStates(player,1)
-        statesPawn2 = self.generateNewStates(player,2)
+    def generateNewStates(self,player):
+        statesPawn1 = self.generateStatesForPawn(player,1)
+        statesPawn2 = self.generateStatesForPawn(player,2)
 
 
-    def generateNewStates(self, player : Player, pawnNo)-> List[Matrica]:
+    def generateStatesForPawn(self, player : Player, pawnNo)-> List[Matrica]:
         ''' Funckija vraca sve validna stanja za jednog pesaka'''
         #generisi validne porteze 
         #kloniraj matrice map fja 
