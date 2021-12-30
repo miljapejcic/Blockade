@@ -188,15 +188,17 @@ class Matrica:
            pawnNo == 1 => pawn1 
            pawnNo == 2 => pawn2
            Validnost je vec okej'''
-
+        
         x = pawnPositions[0]
         y = pawnPositions[1]
         if player == None or pawnNo not in [1,2]:
             return False
         pawn = player.getPawn(pawnNo)
+
         self.mat[pawn.x][pawn.y].player = None #brisanje sa stare lokacije
         player.movePawn(pawnNo, x, y) #pomeranje pijuna u player 
         self.mat[x][y].player = player #nova pozicija
+
         return True
     
     def PutWall(self, player: Player, wallType: int,wallPositions: List[int]) -> bool:
