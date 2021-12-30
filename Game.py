@@ -189,10 +189,12 @@ class Game:
                 #print(f'Matrica_{i} = {id(clonedMatrice[i])}')
                 #clonedMatrice[i].printBoard()
         #ako ima zidova
+        counter = 0
         for ind in range(0,len(clonedMatrice)):
             mat=clonedMatrice[ind]
             for i in range(0,mat.dimX-1):
                 for j in range(0,mat.dimY-1):
+                    
                     def addMatrix(mat: Matrica, i,j,wallType,player, matriceNewState):
                         if mat.validateWall(wallType, [i,j]):
                             tmp = mat.clone()
@@ -203,6 +205,7 @@ class Game:
                                 tmp.printBoard()
                     naruto = copy.deepcopy(player)
                     if playersClones[ind].hasWalls(0):
+                        counter += 1
                         addMatrix(mat,i,j,0,naruto,matriceNewState)
                         # if mat.validateWall(0, [i,j]):
                         #     tmp = mat.clone()
@@ -210,6 +213,7 @@ class Game:
                         #     if tr:
                         #         matriceNewState.append(tmp)
                     if playersClones[ind].hasWalls(1):
+                        counter += 1
                         addMatrix(mat,i,j,1,naruto,matriceNewState)
 
                         # if mat.validateWall(1, [i,j]):
@@ -217,6 +221,7 @@ class Game:
                         #     tr= tmp.PutWall(playersClones[ind],1,[i,j])
                         #     if tr:
                         #         matriceNewState.append(tmp)
+        print(f'Counter == {counter}')
         return matriceNewState        
 
 
