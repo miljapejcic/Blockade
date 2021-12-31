@@ -82,7 +82,8 @@ class Game:
         #prvo cemo da napravimo da radi PvP
         # moveDone = False
         print(f"Trenutno igra {player.sign} \n")
-        self.generateNewStates(player)
+        if player.sign == 'O':
+            self.generateNewStates(player)
         movePawnDone = False
         while not movePawnDone:
             pawnNo = int(input("Izaberi pesaka(1 ili 2): "))
@@ -169,6 +170,7 @@ class Game:
         #i odigraj potez map fja 
         #vrati klon matrice 
 
+        print("Starting generating matrices...")
         pawn= player.getPawn(pawnNo)
         x=pawn.x
         y=pawn.y
@@ -181,8 +183,8 @@ class Game:
             playersClones.append(copy.deepcopy(player))
         for i in range(0, len(validMoves)):
             clonedMatrice[i].movePawn(playersClones[i],pawnNo,validMoves[i])
-            print(f'Matrica_{i} = {id(clonedMatrice[i])}')
-            clonedMatrice[i].printBoard()   
+            # print(f'Matrica_{i} = {id(clonedMatrice[i])}')
+            # clonedMatrice[i].printBoard()   
         #ako nema zidova    
         if not player.hasAnyWalls():            
             return clonedMatrice
@@ -201,8 +203,8 @@ class Game:
                             tr= tmp.PutWall(player,wallType,[i,j])
                             if tr:
                                 matriceNewState.append(tmp)
-                                print(f'Matrica_{i} = {id(tmp)}')
-                                tmp.printBoard()
+                                # print(f'Matrica_{i} = {id(tmp)}')
+                                # tmp.printBoard()
                     naruto = copy.deepcopy(player)
                     if playersClones[ind].hasWalls(0):
                         counter += 1
