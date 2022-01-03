@@ -1,6 +1,7 @@
 from Pawn import *
 class Player: 
     def __init__(self, sign: str, wallNums: int ):
+        self.wallNums = wallNums
         self.vertWallNum = wallNums
         self.horWallNum = wallNums
         self.pawn1 = None
@@ -44,3 +45,8 @@ class Player:
         else :
             self.pawn2.x = x
             self.pawn2.y = y
+
+    def clone(self):
+        player = Player(self.sign,self.wallNums)
+        player.AddPawns(self.pawn1.clone(),self.pawn2.clone())
+        return player

@@ -14,4 +14,8 @@ class Cell:
     def hasPlayer(self) -> bool:
         return self.player != None
 
+    def clone(self):
+        cell = Cell(self.player.clone() if self.player != None else None,self.rightWall,self.bottomWall)
+        return cell
+
     

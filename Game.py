@@ -33,6 +33,7 @@ class Game:
 
         
         self.matrica = Matrica(dimX,dimY,player1_pawn1,player1_pawn2,player2_pawn1,player2_pawn2)
+        self.matrica.mat = self.matrica.makeMatrix()
         wallNums = int(input("Uneti broj zidova: "))
 
         #prvi igrac X 
@@ -82,8 +83,8 @@ class Game:
         #prvo cemo da napravimo da radi PvP
         # moveDone = False
         print(f"Trenutno igra {player.sign} \n")
-        if player.sign == 'O':
-            self.generateNewStates(player)
+        # if player.sign == 'O':
+        self.generateNewStates(player)
         movePawnDone = False
         while not movePawnDone:
             pawnNo = int(input("Izaberi pesaka(1 ili 2): "))
@@ -118,6 +119,8 @@ class Game:
                             self.printWall(player,wallType,wallPositions)
                             self.printBoard()
                             putWallDone = True
+                        else: 
+                            print("Nevalidna pozicija zida!")
                 else:     
                     print("Nemate trazeni tip zida!")
         return player
@@ -136,27 +139,22 @@ class Game:
         print(f"Igrac {player.sign} je postavio zid {tipZida} izmedju polja [({x},{y}),({x},{y+1}),({x+1},{y}),({x+1},{y+1})]")
 
     def cloneMatrix(self) -> Matrica:
-       
-        return   self.matrica.clone()
+        return  self.matrica.clone()
        
 
     def generateMoves(self, player: Player, pawnNo : int)-> List[List[int]]:
         pawn=player.getPawn(pawnNo)
         x=pawn.x
         y=pawn.y
-        potezi= []
-        for i in range(pawn.x-1,pawn.x+2):
-            for j in range(pawn.y-1, pawn.y+2):
-                if not (pawn.x==i and pawn.y==j):
-                    if self.matrica.validateMove(player,pawnNo,i-x,j-y):
-                        potezi.append([i,j])
-        nizX  = [-2,2,0,0]
-        nizY = [0,0,-2,2]
-        for i in range(0,4):
-            if self.matrica.validateMove(player,pawnNo, nizX[i], nizY[i]):
-                potezi.append([x+nizX[i],y+nizY[i]])
-
-        return potezi
+        moves = pawn.getMoves()
+        validMoves = []
+        
+        for move in moves:
+            move[0] -= x
+            move[1] -= y
+            if self.matrica.validateMove(player,pawnNo,move[0],move[1]):
+                validMoves.append(move)
+        return validMoves
 
     def generateNewStates(self,player):
         statesPawn1 = self.generateStatesForPawn(player,1)
@@ -171,6 +169,7 @@ class Game:
         #vrati klon matrice 
 
         print("Starting generating matrices...")
+        
         pawn= player.getPawn(pawnNo)
         x=pawn.x
         y=pawn.y
@@ -180,16 +179,15 @@ class Game:
         matriceNewState =[]
         for i in range(0, len(validMoves)):
             clonedMatrice.append(self.cloneMatrix())
-            playersClones.append(copy.deepcopy(player))
+            playersClones.append(player.clone())
         for i in range(0, len(validMoves)):
             clonedMatrice[i].movePawn(playersClones[i],pawnNo,validMoves[i])
-            # print(f'Matrica_{i} = {id(clonedMatrice[i])}')
-            # clonedMatrice[i].printBoard()   
+           
         #ako nema zidova    
-        if not player.hasAnyWalls():            
+        if not player.hasAnyWalls():  
+            print(f'Counter == {len(validMoves)}')         
             return clonedMatrice
-                #print(f'Matrica_{i} = {id(clonedMatrice[i])}')
-                #clonedMatrice[i].printBoard()
+               
         #ako ima zidova
         counter = 0
         for ind in range(0,len(clonedMatrice)):
@@ -203,54 +201,20 @@ class Game:
                             tr= tmp.PutWall(player,wallType,[i,j])
                             if tr:
                                 matriceNewState.append(tmp)
-                                # print(f'Matrica_{i} = {id(tmp)}')
-                                # tmp.printBoard()
-                    naruto = copy.deepcopy(player)
+                              
+                    naruto = player.lclone()
                     if playersClones[ind].hasWalls(0):
                         counter += 1
                         addMatrix(mat,i,j,0,naruto,matriceNewState)
-                        # if mat.validateWall(0, [i,j]):
-                        #     tmp = mat.clone()
-                        #     tr= tmp.PutWall(playersClones[ind],0,[i,j])
-                        #     if tr:
-                        #         matriceNewState.append(tmp)
+                       
                     if playersClones[ind].hasWalls(1):
                         counter += 1
                         addMatrix(mat,i,j,1,naruto,matriceNewState)
 
-                        # if mat.validateWall(1, [i,j]):
-                        #     tmp = mat.clone()
-                        #     tr= tmp.PutWall(playersClones[ind],1,[i,j])
-                        #     if tr:
-                        #         matriceNewState.append(tmp)
         print(f'Counter == {counter}')
         return matriceNewState        
 
 
-        
-
-        # #print(f'Matrica_ORG = {id(self.matrica)}')
-        # # clonedMatrice = list(itertools.repeat(self.cloneMatrix(),len(validMoves)))
-        # for i in range(0, len(validMoves)):
-        #     clonedMatrice.append(self.cloneMatrix())
-        #     playersClones.append(copy.deepcopy(player))
-        #     print(f'Matrica_{i} = {id(clonedMatrice[i])}')
-        #     clonedMatrice[i].printBoard()
-        
-            
-        # for i in range(0, len(validMoves)):
-        #     clonedMatrice[i].changeStateWithoutWalls(playersClones[i],pawnNo,validMoves[i][0] - x, validMoves[i][1] - y)
-        #     print(f'Matrica_{i} = {id(clonedMatrice[i])}')
-        #     clonedMatrice[i].printBoard()
-        # print(f'Matrica_ORG = {id(self.matrica)}')
-        # self.matrica.printBoard()
-        # return matriceNewState
-
-            
-        
-
-        # print(self.matrica)
-        # print(clone)
     
 game = Game()
 game.matrixInit()

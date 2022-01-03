@@ -1,8 +1,9 @@
 import copy
-from typing import ContextManager, List
+from typing import List
 from Cell import *
 from Player import *
 from Pawn import *
+from functools import reduce
 class Matrica: 
     
     '''Za pomeranje levo-desno se menja y koordinata
@@ -26,10 +27,22 @@ class Matrica:
         self.startPosX2 = x2
         self.startPosO1 = o1
         self.startPosO2 = o2
-        self.mat = self.__make_matrix__()
-        
+        self.mat = None
 
-    def __make_matrix__(self):
+
+    def clone(self):
+        klon = Matrica(self.dimX, self.dimY,self.startPosX1,self.startPosX2,self.startPosO1,self.startPosO2)
+        klon.mat = []
+        for i in range(0,klon.dimX):
+            klon.mat.append([])
+            for j in range(0,klon.dimY):
+                klon.mat[i].append(self.mat[i][j].clone())
+        
+        klon.addPlayers(self.playerX.clone(),self.playerO.clone())
+        return klon
+        # return copy.deepcopy(self)
+
+    def makeMatrix(self):
         '''Kreiranje matrice'''
         self.mat = [[ Cell(None,False,False) for i in range(0,self.dimY)] for j in range (0,self.dimX)]
         for i in range(0,self.dimY):
@@ -42,7 +55,7 @@ class Matrica:
     def addPlayers(self,playerX: Player, playerO: Player):
         self.playerX = playerX
         self.playerO = playerO
-
+       
         #postavljanje na tabli
         self.mat[playerX.pawn1.x][playerX.pawn1.y].player = self.playerX
         self.mat[playerX.pawn2.x][playerX.pawn2.y].player = self.playerX
@@ -112,48 +125,151 @@ class Matrica:
             return self.movePawn(player, pawnNo,[pawn.x + xDir, pawn.y + yDir])
         else:
             return False
+    def calcHeuristic(self,start: List[int], end: List[int]) -> int:
+        '''Manhatan heuristika, suma, abs, cilj - start'''
+        result = 0
+        for i in [0,1]:
+            result += abs(end[i] - start[i])
+        return result
 
-    def isBlocking(self):
-        listOfPos = [self.playerX.getPawn(1).getPositions(), self.playerX.getPawn(2).getPositions(), self.playerO.getPawn(1).getPositions(),
-                     self.playerO.getPawn(2).getPositions(), self.startPosX1, self.startPosX2, self.startPosO1, self.startPosO2]
-        for i in range(0, 8):
-            if self.doesPathExist(listOfPos[i%8], listOfPos[(i+1)%8]) == False:
-                return True
+        
+    def A_star(self, player:Player, pawnNo: int, end: List[int]) -> bool:
+        '''Returns True if there is path, otherwise False'''
+        #init
+        pawn = player.getPawn(pawnNo)
+        start = pawn.getPositions()
+        if start == end:
+            return True
+        startTup = tuple(start)
+        found_node = False
+        openList = []
+        closedList = []
+        prev_nodes = dict()
+        g = dict() #udaljenosti od starta 
+        g[startTup] = 0 
+        prev_nodes[startTup] = None
+        f = 0 + self.calcHeuristic(start,end) #funkcija evaluacije f = g + h
+        openList.append((start,f))
+        while len(openList) > 0 and not found_node:
+            minEl = min(openList, key= lambda x: x[1])
+            node = minEl[0]
+            openList.remove(minEl)
+            nodeTup = tuple(node)
+            if node == end:
+                found_node = True
+                break
+            #potrebni zbog parametara funkcije samo 
+            playerTmp = Player(player.sign,0)
+            pawnTmp = Pawn(node)
+            playerTmp.pawn1 = pawnTmp
+            moves = pawnTmp.getMoves()
+            for move in moves: 
+                moveTmp = list(move)
+                moveTup = tuple(move)
+                moveTmp[0] -= pawnTmp.x #dirX 
+                moveTmp[1] -= pawnTmp.y #dirY
+                if self.validateMove(playerTmp,1,moveTmp[0],moveTmp[1]):
+                    steps =  sum(list(map(lambda x: abs(x),moveTmp)))
+                    distance = g[nodeTup] + steps
+                    heur = self.calcHeuristic(move,end)
+                    f = distance + heur
+                    
+                    #odigrane poteze preskace u ovom ifu 
+                    if  move not in openList and move not in closedList: #nikad nije obidjen 
+                        openList.append((move,f))
+                        prev_nodes[moveTup] = node
+                        g[moveTup] = distance
+
+                    elif move in openList: #mozda je vec dodat u niz
+                        #proveravamo distance
+                        if g[moveTup] > distance:
+                            #nova vrednost je bolja vrednost
+                            g[moveTup] = distance
+                            prev_nodes[moveTup] = node
+                            nadjen = list(filter(lambda x: x[0] == move,openList))
+                            openList.remove(nadjen[0])
+                            nadjen[1] = f + distance
+                            openList.append(nadjen)
+            closedList.append(node)
+        if found_node:
+            return True
         return False
 
-    def doesPathExist(self, startPositions: List[int], endPositions: List[int]):
-        solution = [[ 0 for i in range(0,self.dimY)] for j in range (0,self.dimX)]
-        return self.doesPathExistBt(startPositions[0], startPositions[1], endPositions[0], endPositions[1], solution)
+    def isBlocking(self):
+        '''Returns True if there is no path, False if there is path'''
+        imaProlaz = []
+        imaProlaz.insert(0,self.A_star(self.playerX,1,self.startPosO1))
+        imaProlaz.insert(1,self.A_star(self.playerX,1,self.startPosO2))
+        imaProlaz.insert(2,self.A_star(self.playerX,2,self.startPosO1))
+        imaProlaz.insert(3,self.A_star(self.playerX,2,self.startPosO2))
 
-    def doesPathExistBt(self, x1: int, y1: int, x2: int, y2:int, solution: List[List[int]]):
-        if x1 == x2 and y1 == y2:
-            solution[x1][y1] = 1
-            return True
+        imaProlaz.insert(4,self.A_star(self.playerO,1,self.startPosX1))
+        imaProlaz.insert(5,self.A_star(self.playerO,2,self.startPosX2))
+        imaProlaz.insert(6,self.A_star(self.playerO,1,self.startPosX1))
+        imaProlaz.insert(7,self.A_star(self.playerO,2,self.startPosX2))
         
-        if x1 >= 0 and x1 < self.dimX and y1 >= 0 and y1 < self.dimY:
-            if solution[x1][y1] == 1:
-                return False
-            
-            solution[x1][y1] = 1
+        for prolaz in imaProlaz:
+            if not prolaz:
+                return True
+        return False 
 
-            if self.mat[x1][y1].bottomWall == False:
-                if self.doesPathExistBt(x1 + 1, y1, x2, y2, solution) == True:
-                    return True
-
-            if self.mat[x1][y1].rightWall == False:
-                if self.doesPathExistBt(x1, y1 + 1 , x2, y2, solution) == True:
-                    return True
-
-            if self.mat[x1-1][y1].bottomWall == False:
-                if self.doesPathExistBt(x1 - 1, y1, x2, y2, solution) == True:
-                    return True
-
-            if self.mat[x1][y1-1].rightWall == False:
-                if self.doesPathExistBt(x1, y1 - 1, x2, y2, solution) == True:
-                    return True
-
-            solution[x1][y1] = 0
+           
+        if self.A_star(self.playerX,1,self.startPosO2):
             return False
+        if self.A_star(self.playerX,2,self.startPosO1):
+            return False
+        if self.A_star(self.playerX,2,self.startPosO2):
+            return False
+
+        if self.A_star(self.playerO,1,self.startPosX1):
+            return False
+        if self.A_star(self.playerX,1,self.startPosX2):
+            return False
+        if self.A_star(self.playerX,2,self.startPosX1):
+            return False
+        if self.A_star(self.playerX,2,self.startPosX2):
+            return False
+        return False
+        # listOfPos = [self.playerX.getPawn(1).getPositions(), self.playerX.getPawn(2).getPositions(), self.playerO.getPawn(1).getPositions(),
+        #              self.playerO.getPawn(2).getPositions(), self.startPosX1, self.startPosX2, self.startPosO1, self.startPosO2]
+        # for i in range(0, 8):
+        #     if self.doesPathExist(listOfPos[i%8], listOfPos[(i+1)%8]) == False:
+        #         return True
+        # return False
+
+    # def doesPathExist(self, startPositions: List[int], endPositions: List[int]):
+    #     solution = [[ 0 for i in range(0,self.dimY)] for j in range (0,self.dimX)]
+    #     return self.doesPathExistBt(startPositions[0], startPositions[1], endPositions[0], endPositions[1], solution)
+
+    # def doesPathExistBt(self, x1: int, y1: int, x2: int, y2:int, solution: List[List[int]]):
+    #     if x1 == x2 and y1 == y2:
+    #         solution[x1][y1] = 1
+    #         return True
+        
+    #     if x1 >= 0 and x1 < self.dimX and y1 >= 0 and y1 < self.dimY:
+    #         if solution[x1][y1] == 1:
+    #             return False
+            
+    #         solution[x1][y1] = 1
+
+    #         if self.mat[x1][y1].bottomWall == False:
+    #             if self.doesPathExistBt(x1 + 1, y1, x2, y2, solution) == True:
+    #                 return True
+
+    #         if self.mat[x1][y1].rightWall == False:
+    #             if self.doesPathExistBt(x1, y1 + 1 , x2, y2, solution) == True:
+    #                 return True
+
+    #         if self.mat[x1-1][y1].bottomWall == False:
+    #             if self.doesPathExistBt(x1 - 1, y1, x2, y2, solution) == True:
+    #                 return True
+
+    #         if self.mat[x1][y1-1].rightWall == False:
+    #             if self.doesPathExistBt(x1, y1 - 1, x2, y2, solution) == True:
+    #                 return True
+
+    #         solution[x1][y1] = 0
+    #         return False
 
 
 
@@ -217,18 +333,18 @@ class Matrica:
                 self.mat[x][y].bottomWall = False
                 self.mat[x][y+1].bottomWall = False
                 player.horWallNum = player.horWallNum + 1
-                print("ne smete da blokirate ciljeve ili pesake")
+                # print("ne smete da blokirate ciljeve ili pesake")
                 return False
             return True
         else:
             self.mat[x][y].rightWall = True
             self.mat[x+1][y].rightWall = True
             player.vertWallNum = player.vertWallNum - 1
-            if self.isBlocking():
+            if  self.isBlocking():
                 self.mat[x][y].rightWall = False
                 self.mat[x+1][y].rightWall = False
                 player.vertWallNum = player.vertWallNum + 1
-                print("ne smete da blokirate ciljeve ili pesake")
+                # print("ne smete da blokirate ciljeve ili pesake")
                 return False
             return True
 
@@ -264,23 +380,24 @@ class Matrica:
             return canPass == True and canJump == True  
         else: #pomeranje po jednoj osi 
             if totalSteps == 1:
+
+                canPass1 = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir, 1)
+                if canPass1 == False:
+                    return False
+
                 canPass2 = False #default-ne vrednosti
-                canJump2 = True  #default-ne vrednosti
-                if self.isOutOfRange(pawn.getPositions(),2*xDir,2*yDir):
-                    canPass2 = True
-                    canJump2 = False
-                else: 
+                canJump2 = False  #default-ne vrednosti
+           
+                if not self.isOutOfRange(pawn.getPositions(),2*xDir,2*yDir):
                     canPass2 = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir,2)
                     canJump2 = self.canJump(player,pawn.x + 2*xDir, pawn.y + 2*yDir)
-                canPass1 = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir, 1)
-                if canPass2 == True and canPass1 == True :
-                    if canJump2 == False:
-                        return  self.canJump(player, pawn.x + xDir, pawn.y + yDir)
-                    else: 
-                        return False
-                    # return True if canJump2 == False else False
-                return False                
-            #total steps = 24    
+
+                if canPass2 == True and canJump2 == False:
+                    return self.canJump(player,pawn.x + xDir, pawn.y + yDir)
+                return False
+      
+                               
+            #total steps = 2   
             canPass = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir,totalSteps)
             canJump = self.canJump(player,pawn.x + xDir, pawn.y + yDir)
             return canPass == True and canJump == True
@@ -390,5 +507,4 @@ class Matrica:
         return False
 
     
-    def clone(self):
-        return copy.deepcopy(self)
+    

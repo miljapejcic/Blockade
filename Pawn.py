@@ -24,3 +24,18 @@ class Pawn:
     
     def getPositions(self) -> List[int]:
         return [self.x,self.y]
+    def getMoves(self) -> List[List[int]]:
+        moves = []
+        for i in range(self.x-1,self.x+2):
+            for j in range(self.y-1, self.y+2):
+                if not (self.x==i and self.y==j):
+                    moves.append([i,j])
+        nizX  = [-2,2,0,0]
+        nizY = [0,0,-2,2]
+        for i in range(0,4):
+           moves.append([self.x + nizX[i],self.y + nizY[i]])
+        return moves
+    
+    def clone(self): 
+        pawn = Pawn(self.getPositions())
+        return pawn
