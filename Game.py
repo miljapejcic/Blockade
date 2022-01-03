@@ -239,37 +239,50 @@ class Game:
         print(f'Counter == {counter}')
         return matriceNewState        
 
-    def minimax(self, state: Matrica, depth: int,alfa:int, beta:int, player: Player):
+    def minimax(self, state: Matrica, depth: int,alfa:int, beta:int, player: Player) -> Matrica:
         #procena stanja, vracanje procene za krajnje stanje
         if depth == 0 or self.isFinishedGame(player): 
-            return state
+            if player.sign== 'X':
+                return [state, self.procenaStanja(state.playerX, state.startPosO1, state.startPosO2)]
+            else:
+                 return [state, self.procenaStanja(state.playerO, state.startPosX1, state.startPosX2)]
+                
         children = self.generateNewStates(player)
-        if player.sign == 'X':
+        if player.sign == 'O':
             maxEval= -1000
             for child in children:
-                eval=self.minimax(child, depth-1, alfa, beta, player) #treba da se promeni player
-                #ovde treba da se uporede vrednosti tipa udaljenost pijuna od cilja
-                #da ne zaboravim - ne heuristika nego samo x+y za pocetak |cilj - pesak|
-                
-                maxEval=max(maxEval, eval)
-                alfa= max(alfa, eval)
+                eval=self.minimax(child, depth-1, alfa, beta, child.playerX)
+                maxEval=max(maxEval, eval[1])
+                alfa= max(alfa, eval[1])
                 if beta <= alfa:
                     break
             return maxEval
         else:
             minEval=1000
             for child in children:
-                eval=self.minimax(child, depth-1, alfa, beta, player) #treba da se promeni player
-                #ovde treba da se uporede vrednosti tipa udaljenost pijuna od cilja
-                minEval=max(minEval, eval)
-                beta= max(beta, eval)
+                eval=self.minimax(child, depth-1, alfa, beta, child.playerO)
+                minEval=max(minEval, eval[1])
+                beta= max(beta, eval[1])
                 if beta <= alfa:
                     break
             return minEval
         
-    def procenaStanja():
-        return None
-    
+    def procenaStanja(self, player: Player, cilj1: int, cilj2: int)-> int:
+        dist=0
+        distX1C1= self.calcDistance(player.pawn1.getPositions(),cilj1) #razdaljina izmedju x1 i c1
+        distX1C2= self.calcDistance(player.pawn1.getPositions(),cilj2) #raz izmedju x1 i c2
+        distX2C1= self.calcDistance(player.pawn1.getPositions(),cilj1) #raz izmedju x2 i c1
+        distX2C2= self.calcDistance(player.pawn1.getPositions(),cilj2) #raz izmedju x2 i c2
+        dist= min(min(distX1C1,distX1C2), min(distX2C1, distX2C2))
+        return dist
+
+    def calcDistance(start: List[int], end: List[int]) -> int:
+        result = 0
+        for i in [0,1]:
+            result += abs(end[i] - start[i])
+        return result
+
+
 game = Game()
 game.matrixInit()
 game.playGame()
