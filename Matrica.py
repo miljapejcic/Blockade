@@ -198,7 +198,10 @@ class Matrica:
         self.mat[pawn.x][pawn.y].player = None #brisanje sa stare lokacije
         player.movePawn(pawnNo, x, y) #pomeranje pijuna u player 
         self.mat[x][y].player = player #nova pozicija
-
+        if player.sign == 'X':
+            self.playerX.movePawn(pawnNo, x, y)
+        else:
+            self.playerO.movePawn(pawnNo, x, y)
         return True
     
     def PutWall(self, player: Player, wallType: int,wallPositions: List[int]) -> bool:

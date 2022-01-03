@@ -69,7 +69,7 @@ class Game:
         while True:
             if self.onTurn == 'X':
                 currentPlayer = self.playTurn(self.players[self.onTurn])
-                self.onTurn == 'O'
+                self.onTurn = 'O'
             else:
                 currentPlayer = self.playComputer(self.players[self.onTurn])
                 self.onTurn = 'X'
@@ -84,7 +84,8 @@ class Game:
 
 #dodati funkciju koja odigrava potez kompjutera
     def playComputer(self, player: Player):
-        self.matrica = self.minimax(self.matrica, 1, -1000, 1000, player)[0]
+        tmp = self.minimax(self.matrica, 1, -1000, 1000, player)
+        self.matrica = tmp[0]
         self.printBoard()
         return player
 
@@ -95,8 +96,8 @@ class Game:
         #prvo cemo da napravimo da radi PvP
         # moveDone = False
         print(f"Trenutno igra {player.sign} \n")
-        if player.sign == 'O': #ovo obrisati ako je sve testirano
-            self.generateNewStates(player) 
+        # if player.sign == 'O': #ovo obrisati ako je sve testirano
+        #     self.generateNewStates(player) 
         movePawnDone = False
         while not movePawnDone:
             pawnNo = int(input("Izaberi pesaka(1 ili 2): "))
@@ -239,33 +240,39 @@ class Game:
         print(f'Counter == {counter}')
         return matriceNewState        
 
-    def minimax(self, state: Matrica, depth: int,alfa:int, beta:int, player: Player) -> Matrica:
+    def minimax(self, state: Matrica, depth: int,alfa:int, beta:int, player: Player):
         #procena stanja, vracanje procene za krajnje stanje
         if depth == 0 or self.isFinishedGame(player): 
             if player.sign== 'X':
                 return [state, self.procenaStanja(state.playerX, state.startPosO1, state.startPosO2)]
             else:
                  return [state, self.procenaStanja(state.playerO, state.startPosX1, state.startPosX2)]
-                
+        tmpMatrica = state
         children = self.generateNewStates(player)
         if player.sign == 'O':
             maxEval= -1000
             for child in children:
                 eval=self.minimax(child, depth-1, alfa, beta, child.playerX)
-                maxEval=max(maxEval, eval[1])
+                if eval[1] > maxEval:
+                    maxEval = eval[1]
+                    tmpMatrica = child
+                # maxEval=max(maxEval, eval[1])
                 alfa= max(alfa, eval[1])
                 if beta <= alfa:
                     break
-            return maxEval
+            return [tmpMatrica,maxEval]
         else:
             minEval=1000
             for child in children:
                 eval=self.minimax(child, depth-1, alfa, beta, child.playerO)
-                minEval=max(minEval, eval[1])
+                # minEval=max(minEval, eval[1])
+                if eval[1] < minEval:
+                    minEval = eval[1]
+                    tmpMatrica = child
                 beta= max(beta, eval[1])
                 if beta <= alfa:
                     break
-            return minEval
+            return [tmpMatrica,minEval]
         
     def procenaStanja(self, player: Player, cilj1: int, cilj2: int)-> int:
         dist=0
@@ -276,7 +283,7 @@ class Game:
         dist= min(min(distX1C1,distX1C2), min(distX2C1, distX2C2))
         return dist
 
-    def calcDistance(start: List[int], end: List[int]) -> int:
+    def calcDistance(self, start: List[int], end: List[int]) -> int:
         result = 0
         for i in [0,1]:
             result += abs(end[i] - start[i])
