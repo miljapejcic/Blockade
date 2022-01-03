@@ -67,18 +67,29 @@ class Game:
         winner = None #Player()
         self.printBoard() 
         while True:
-            currentPlayer = self.playTurn(self.players[self.onTurn])
-            # self.printBoard() #prints board after each turn
-            #change whose turn is next
-            self.onTurn = 'X' if self.onTurn == 'O' else 'O'
+            if self.onTurn == 'X':
+                currentPlayer = self.playTurn(self.players[self.onTurn])
+                self.onTurn == 'O'
+            else:
+                currentPlayer = self.playComputer(self.players[self.onTurn])
+                self.onTurn = 'X'
+
             if self.isFinishedGame(currentPlayer):
                 winner = currentPlayer
                 break
         print(f"Igra je zavrsena.\nPobednik je: {winner.sign}", end="\n")
 
+    # def changePlayer():
+    #     return None
+
 #dodati funkciju koja odigrava potez kompjutera
-    def playComputer():
-        return None
+    def playComputer(self, player: Player):
+        self.matrica = self.minimax(self.matrica, 1, -1000, 1000, player)[0]
+        self.printBoard()
+        return player
+
+
+
     def playTurn(self, player: Player) -> Player: 
         '''Player (Human or Computer) plays the turns'''
         #prvo cemo da napravimo da radi PvP
@@ -138,8 +149,7 @@ class Game:
         print(f"Igrac {player.sign} je postavio zid {tipZida} izmedju polja [({x},{y}),({x},{y+1}),({x+1},{y}),({x+1},{y+1})]")
 
     def cloneMatrix(self) -> Matrica:
-       
-        return   self.matrica.clone()
+        return self.matrica.clone()
        
 
     def generateMoves(self, player: Player, pawnNo : int)-> List[List[int]]:
