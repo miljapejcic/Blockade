@@ -77,7 +77,8 @@ class Game:
         print(f"Igra je zavrsena.\nPobednik je: {winner.sign}", end="\n")
 
 #dodati funkciju koja odigrava potez kompjutera
-    
+    def playComputer():
+        return None
     def playTurn(self, player: Player) -> Player: 
         '''Player (Human or Computer) plays the turns'''
         #prvo cemo da napravimo da radi PvP
@@ -238,9 +239,10 @@ class Game:
             for child in children:
                 eval=self.minimax(child, depth-1, alfa, beta, player) #treba da se promeni player
                 #ovde treba da se uporede vrednosti tipa udaljenost pijuna od cilja
-                #da ne zaboravim - ne heuristika nego samo x+y za pocetak
+                #da ne zaboravim - ne heuristika nego samo x+y za pocetak |cilj - pesak|
+                
                 maxEval=max(maxEval, eval)
-                alfa= max(alfa, maxEval) #treba eval
+                alfa= max(alfa, eval)
                 if beta <= alfa:
                     break
             return maxEval
@@ -250,37 +252,13 @@ class Game:
                 eval=self.minimax(child, depth-1, alfa, beta, player) #treba da se promeni player
                 #ovde treba da se uporede vrednosti tipa udaljenost pijuna od cilja
                 minEval=max(minEval, eval)
-                beta= max(beta, minEval) #treba eval
+                beta= max(beta, eval)
                 if beta <= alfa:
                     break
             return minEval
         
-    def max_stanje(lsv):
-        return max(lsv, key=lambda x: x[1])
-    def min_stanje(lsv):
-        return min(lsv, key=lambda x: x[1]) 
-        # #print(f'Matrica_ORG = {id(self.matrica)}')
-        # # clonedMatrice = list(itertools.repeat(self.cloneMatrix(),len(validMoves)))
-        # for i in range(0, len(validMoves)):
-        #     clonedMatrice.append(self.cloneMatrix())
-        #     playersClones.append(copy.deepcopy(player))
-        #     print(f'Matrica_{i} = {id(clonedMatrice[i])}')
-        #     clonedMatrice[i].printBoard()
-        
-            
-        # for i in range(0, len(validMoves)):
-        #     clonedMatrice[i].changeStateWithoutWalls(playersClones[i],pawnNo,validMoves[i][0] - x, validMoves[i][1] - y)
-        #     print(f'Matrica_{i} = {id(clonedMatrice[i])}')
-        #     clonedMatrice[i].printBoard()
-        # print(f'Matrica_ORG = {id(self.matrica)}')
-        # self.matrica.printBoard()
-        # return matriceNewState
-
-            
-        
-
-        # print(self.matrica)
-        # print(clone)
+    def procenaStanja():
+        return None
     
 game = Game()
 game.matrixInit()
