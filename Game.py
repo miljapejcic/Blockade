@@ -122,6 +122,8 @@ class Game:
                             putWallDone = True
                         else: 
                             print("Nevalidna pozicija zida!")
+                    else: 
+                        print("Nevalidna pozicija zida!")
                 else:     
                     print("Nemate trazeni tip zida!")
         return player
