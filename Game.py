@@ -62,7 +62,7 @@ class Game:
         '''Provera da li je player pobedio'''
         return self.matrica.isEndOfGame(player)
  
-    def playGame(self):
+    def playGame(self): #promeniti ovu funkciju tako da neizmenicno igraju igrac i kompjuter
         '''Zapocni igru, igraju igraci naizmenicno'''
         winner = None #Player()
         self.printBoard() 
@@ -76,14 +76,15 @@ class Game:
                 break
         print(f"Igra je zavrsena.\nPobednik je: {winner.sign}", end="\n")
 
+#dodati funkciju koja odigrava potez kompjutera
     
     def playTurn(self, player: Player) -> Player: 
         '''Player (Human or Computer) plays the turns'''
         #prvo cemo da napravimo da radi PvP
         # moveDone = False
         print(f"Trenutno igra {player.sign} \n")
-        if player.sign == 'O':
-            self.generateNewStates(player)
+        if player.sign == 'O': #ovo obrisati ako je sve testirano
+            self.generateNewStates(player) 
         movePawnDone = False
         while not movePawnDone:
             pawnNo = int(input("Izaberi pesaka(1 ili 2): "))
@@ -173,7 +174,7 @@ class Game:
 
         print("Starting generating matrices...")
         pawn= player.getPawn(pawnNo)
-        x=pawn.x
+        x=pawn.x #ovo se ne koristi
         y=pawn.y
         validMoves= self.generateMoves(player,pawnNo)
         playersClones = []
@@ -235,20 +236,21 @@ class Game:
         if player.sign == 'X':
             maxEval= -1000
             for child in children:
-                eval=self.minimax(child, depth-1, alfa, beta, player)
+                eval=self.minimax(child, depth-1, alfa, beta, player) #treba da se promeni player
                 #ovde treba da se uporede vrednosti tipa udaljenost pijuna od cilja
+                #da ne zaboravim - ne heuristika nego samo x+y za pocetak
                 maxEval=max(maxEval, eval)
-                alfa= max(alfa, maxEval)
+                alfa= max(alfa, maxEval) #treba eval
                 if beta <= alfa:
                     break
             return maxEval
         else:
             minEval=1000
             for child in children:
-                eval=self.minimax(child, depth-1, alfa, beta, player)
+                eval=self.minimax(child, depth-1, alfa, beta, player) #treba da se promeni player
                 #ovde treba da se uporede vrednosti tipa udaljenost pijuna od cilja
                 minEval=max(minEval, eval)
-                beta= max(beta, minEval)
+                beta= max(beta, minEval) #treba eval
                 if beta <= alfa:
                     break
             return minEval
