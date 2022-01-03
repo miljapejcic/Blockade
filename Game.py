@@ -161,6 +161,7 @@ class Game:
     def generateNewStates(self,player):
         statesPawn1 = self.generateStatesForPawn(player,1)
         statesPawn2 = self.generateStatesForPawn(player,2)
+        return statesPawn1 + statesPawn2
 
 
     def generateStatesForPawn(self, player : Player, pawnNo)-> List[Matrica]:
@@ -226,9 +227,36 @@ class Game:
         print(f'Counter == {counter}')
         return matriceNewState        
 
-
+    def minimax(self, state: Matrica, depth: int,alfa:int, beta:int, player: Player):
+        #procena stanja, vracanje procene za krajnje stanje
+        if depth == 0 or self.isFinishedGame(player): 
+            return state
+        children = self.generateNewStates(player)
+        if player.sign == 'X':
+            maxEval= -1000
+            for child in children:
+                eval=self.minimax(child, depth-1, alfa, beta, player)
+                #ovde treba da se uporede vrednosti tipa udaljenost pijuna od cilja
+                maxEval=max(maxEval, eval)
+                alfa= max(alfa, maxEval)
+                if beta <= alfa:
+                    break
+            return maxEval
+        else:
+            minEval=1000
+            for child in children:
+                eval=self.minimax(child, depth-1, alfa, beta, player)
+                #ovde treba da se uporede vrednosti tipa udaljenost pijuna od cilja
+                minEval=max(minEval, eval)
+                beta= max(beta, minEval)
+                if beta <= alfa:
+                    break
+            return minEval
         
-
+    def max_stanje(lsv):
+        return max(lsv, key=lambda x: x[1])
+    def min_stanje(lsv):
+        return min(lsv, key=lambda x: x[1]) 
         # #print(f'Matrica_ORG = {id(self.matrica)}')
         # # clonedMatrice = list(itertools.repeat(self.cloneMatrix(),len(validMoves)))
         # for i in range(0, len(validMoves)):
