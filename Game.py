@@ -86,7 +86,7 @@ class Game:
 
 #dodati funkciju koja odigrava potez kompjutera
     def playComputer(self, player: Player):
-        tmp = self.minimax(self.matrica, 1, -1000, 1000, player)
+        tmp = self.minimax(self.matrica, 2, -1000, 1000, player)
         self.matrica = tmp[0]
         self.printBoard()
         return player
@@ -155,8 +155,8 @@ class Game:
         tipZida = "horizontalni" if wallType == 0 else "vertikalni" 
         print(f"Igrac {player.sign} je postavio zid {tipZida} izmedju polja [({x},{y}),({x},{y+1}),({x+1},{y}),({x+1},{y+1})]")
 
-    def cloneMatrix(self) -> Matrica:
-        return self.matrica.clone()
+    def cloneMatrix(self, state:Matrica) -> Matrica:
+        return state.clone()
        
 
     def generateMoves(self, player: Player, pawnNo : int)-> List[List[int]]:
@@ -174,16 +174,16 @@ class Game:
                 validMoves.append(move)
         return validMoves
 
-    def generateNewStates(self,player):
-        statesPawn1 = self.generateStatesForPawn(player,1)
+    def generateNewStates(self,player:Player, state:Matrica):
+        statesPawn1 = self.generateStatesForPawn(player,1, state)
         print(f'Counter == {len(statesPawn1)}')
-        statesPawn2 = self.generateStatesForPawn(player,2)
+        statesPawn2 = self.generateStatesForPawn(player,2, state)
         print(f'Counter == {len(statesPawn2)}')
 
         return statesPawn1 + statesPawn2
 
 
-    def generateStatesForPawn(self, player : Player, pawnNo)-> List[Matrica]:
+    def generateStatesForPawn(self, player : Player, pawnNo, state:Matrica)-> List[Matrica]:
         ''' Funckija vraca sve validna stanja za jednog pesaka'''
         #generisi validne porteze 
         #kloniraj matrice map fja 
@@ -200,8 +200,16 @@ class Game:
         clonedMatrice = []
         matriceNewState =[]
         for i in range(0, len(validMoves)):
-            clonedMatrice.append(self.cloneMatrix())
+            clonedMatrice.append(self.cloneMatrix(state)) #nekaMat.clone()   self.Clone(nekaMat)
             playersClones.append(player.clone())
+            #OVO SAM JEDINO MENJALA
+            # if player.sign == 'X':
+            #     plO = state.playerO.clone()
+            #     clonedMatrice[i].addPlayers(playersClones[i], plO)
+            # else:
+            #     plX = state.playerX.clone()
+            #     clonedMatrice[i].addPlayers(plX, playersClones[i])
+                
             clonedMatrice[i].movePawn(playersClones[i],pawnNo,validMoves[i])
             # print('------')
             # clonedMatrice[i].printBoard()
@@ -255,11 +263,13 @@ class Game:
             else:
                  return [state, self.procenaStanja(state.playerO, state.startPosX1, state.startPosX2)]
         tmpMatrica = state
-        children = self.generateNewStates(player)
+        # clonedPlayer = player.clone()
+        children = self.generateNewStates(player, state)
         if player.sign == 'O':
             maxEval= -1000
             for child in children:
-                eval=self.minimax(child, depth-1, alfa, beta, child.playerX)
+                plX = child.playerX.clone()
+                eval=self.minimax(child, depth-1, alfa, beta, plX)
                 if eval[1] > maxEval:
                     maxEval = eval[1]
                     tmpMatrica = child
@@ -271,7 +281,8 @@ class Game:
         else:
             minEval=1000
             for child in children:
-                eval=self.minimax(child, depth-1, alfa, beta, child.playerO)
+                plO = child.playerO.clone()
+                eval=self.minimax(child, depth-1, alfa, beta, plO)
                 # minEval=max(minEval, eval[1])
                 if eval[1] < minEval:
                     minEval = eval[1]
@@ -285,8 +296,8 @@ class Game:
         dist=0
         distX1C1= self.calcDistance(player.pawn1.getPositions(),cilj1) #razdaljina izmedju x1 i c1
         distX1C2= self.calcDistance(player.pawn1.getPositions(),cilj2) #raz izmedju x1 i c2
-        distX2C1= self.calcDistance(player.pawn1.getPositions(),cilj1) #raz izmedju x2 i c1
-        distX2C2= self.calcDistance(player.pawn1.getPositions(),cilj2) #raz izmedju x2 i c2
+        distX2C1= self.calcDistance(player.pawn2.getPositions(),cilj1) #raz izmedju x2 i c1
+        distX2C2= self.calcDistance(player.pawn2.getPositions(),cilj2) #raz izmedju x2 i c2
         dist= min(min(distX1C1,distX1C2), min(distX2C1, distX2C2))
         return dist
 
