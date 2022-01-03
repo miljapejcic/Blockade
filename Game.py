@@ -70,10 +70,10 @@ class Game:
         self.printBoard() 
         while True:
             if self.onTurn == 'X':
-                currentPlayer = self.playTurn(self.players[self.onTurn])
+                currentPlayer = self.playTurn(self.matrica.playerX)
                 self.onTurn = 'O'
             else:
-                currentPlayer = self.playComputer(self.players[self.onTurn])
+                currentPlayer = self.playComputer(self.matrica.playerO)
                 self.onTurn = 'X'
 
             if self.isFinishedGame(currentPlayer):
@@ -203,14 +203,16 @@ class Game:
             clonedMatrice.append(self.cloneMatrix(state)) #nekaMat.clone()   self.Clone(nekaMat)
             playersClones.append(player.clone())
             #OVO SAM JEDINO MENJALA
-            # if player.sign == 'X':
-            #     plO = state.playerO.clone()
-            #     clonedMatrice[i].addPlayers(playersClones[i], plO)
-            # else:
-            #     plX = state.playerX.clone()
-            #     clonedMatrice[i].addPlayers(plX, playersClones[i])
+            if player.sign == 'X':
+                plO = state.playerO.clone()
+                clonedMatrice[i].addPlayers(playersClones[i], plO)
+                clonedMatrice[i].movePawn(clonedMatrice[i].playerX, pawnNo,validMoves[i])
+            else:
+                plX = state.playerX.clone()
+                clonedMatrice[i].addPlayers(plX, playersClones[i])
+                clonedMatrice[i].movePawn(clonedMatrice[i].playerO,pawnNo,validMoves[i])
                 
-            clonedMatrice[i].movePawn(playersClones[i],pawnNo,validMoves[i])
+            # clonedMatrice[i].movePawn(playersClones[i],pawnNo,validMoves[i])
             # print('------')
             # clonedMatrice[i].printBoard()
         # for i in range(0, len(validMoves)):
@@ -287,12 +289,12 @@ class Game:
                 if eval[1] < minEval:
                     minEval = eval[1]
                     tmpMatrica = child
-                beta= max(beta, eval[1])
+                beta= min(beta, eval[1])
                 if beta <= alfa:
                     break
             return [tmpMatrica,minEval]
         
-    def procenaStanja(self, player: Player, cilj1: int, cilj2: int)-> int:
+    def procenaStanja(self, player: Player, cilj1: List[int], cilj2: List[int])-> int:
         dist=0
         distX1C1= self.calcDistance(player.pawn1.getPositions(),cilj1) #razdaljina izmedju x1 i c1
         distX1C2= self.calcDistance(player.pawn1.getPositions(),cilj2) #raz izmedju x1 i c2
