@@ -151,15 +151,19 @@ class Game:
         validMoves = []
         
         for move in moves:
-            move[0] -= x
-            move[1] -= y
-            if self.matrica.validateMove(player,pawnNo,move[0],move[1]):
+            tmpMove = list(move)
+            tmpMove[0] -= x
+            tmpMove[1] -= y
+            if self.matrica.validateMove(player,pawnNo,tmpMove[0],tmpMove[1]):
                 validMoves.append(move)
         return validMoves
 
     def generateNewStates(self,player):
         statesPawn1 = self.generateStatesForPawn(player,1)
+        print(f'Counter == {len(statesPawn1)}')
         statesPawn2 = self.generateStatesForPawn(player,2)
+        print(f'Counter == {len(statesPawn2)}')
+
 
 
     def generateStatesForPawn(self, player : Player, pawnNo)-> List[Matrica]:
@@ -192,7 +196,6 @@ class Game:
             return clonedMatrice
                
         #ako ima zidova
-        counter = 0
         time_A_star = 0
         startGeneralTime = time.perf_counter()
         for ind in range(0,len(clonedMatrice)):
@@ -200,7 +203,7 @@ class Game:
             for i in range(0,mat.dimX-1):
                 for j in range(0,mat.dimY-1):
                     
-                    def addMatrix(mat: Matrica, i,j,wallType,player, matriceNewState,time_A_star):
+                    def addMatrix(mat: Matrica, i,j,wallType,player, matriceNewState):
                         startAStar = time.perf_counter()
                         if mat.validateWall(wallType, [i,j]):
                             tmp = mat.clone()
@@ -208,23 +211,23 @@ class Game:
                             
                             if tr:
                                 matriceNewState.append(tmp)
+                                # print('------')
+                                # tmp.printBoard()
                         endAStar = time.perf_counter()
                         return endAStar - startAStar
 
                     naruto = player.clone()
                     if playersClones[ind].hasWalls(0):
-                        counter += 1
-                        time_A_star += addMatrix(mat,i,j,0,naruto,matriceNewState,time_A_star)
+                        time_A_star += addMatrix(mat,i,j,0,naruto,matriceNewState)
                        
                     if playersClones[ind].hasWalls(1):
-                        counter += 1
-                        time_A_star += addMatrix(mat,i,j,1,naruto,matriceNewState,time_A_star)
+                        time_A_star += addMatrix(mat,i,j,1,naruto,matriceNewState)
                     
         endGeneralTime = time.perf_counter()
         print(f'General time: {endGeneralTime - startGeneralTime}')
         print(f'A_star time: {time_A_star}')
 
-        print(f'Counter == {counter}')
+        
         return matriceNewState        
 
 
