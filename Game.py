@@ -86,10 +86,10 @@ class Game:
 
 #dodati funkciju koja odigrava potez kompjutera
     def playComputer(self, player: Player):
-        tmp = self.minimax(self.matrica, 2, -1000, 1000, player)
+        tmp = self.minimax(self.matrica, 3, -1000, 1000, player)
         self.matrica = tmp[0]
         self.printBoard()
-        return player
+        return self.matrica.playerO
 
 
 
@@ -192,6 +192,7 @@ class Game:
 
         print("Starting generating matrices...")
         
+        startGeneralTime = time.perf_counter()
         pawn= player.getPawn(pawnNo)
         x=pawn.x #ovo se ne koristi
         y=pawn.y
@@ -219,12 +220,13 @@ class Game:
            
         #ako nema zidova    
         if not player.hasAnyWalls():  
-            print(f'Counter == {len(validMoves)}')         
+                    
+            endGeneralTime = time.perf_counter()
+            print(f'General time: {endGeneralTime - startGeneralTime}')
             return clonedMatrice
                
         #ako ima zidova
         time_A_star = 0
-        startGeneralTime = time.perf_counter()
         for ind in range(0,len(clonedMatrice)):
             mat=clonedMatrice[ind]
             for i in range(0,mat.dimX-1):
