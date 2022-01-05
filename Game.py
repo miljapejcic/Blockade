@@ -86,7 +86,7 @@ class Game:
 
 #dodati funkciju koja odigrava potez kompjutera
     def playComputer(self, player: Player):
-        tmp = self.minimax(self.matrica, 3, -1000, 1000, player)
+        tmp = self.minimax(self.matrica, 2, -1000, 1000, player)
         self.matrica = tmp[0]
         self.printBoard()
         return self.matrica.playerO
