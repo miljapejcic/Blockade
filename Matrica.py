@@ -1,5 +1,5 @@
 import copy
-from typing import List
+from typing import List, Tuple
 from Cell import *
 from Player import *
 from Pawn import *
@@ -132,9 +132,11 @@ class Matrica:
             result += abs(end[i] - start[i])
         return result
 
-        
-    def A_star(self, player:Player, pawnNo: int, end: List[int]) -> bool:
-        '''Returns True if there is path, otherwise False'''
+
+    
+
+    def A_star(self, player:Player, pawnNo: int, end: List[int]) -> List:
+        '''Returns path as a list of tuples if there is one, otherwise returns empty list'''
         #init
         # self.printBoard()
         pawn = player.getPawn(pawnNo)
@@ -192,28 +194,41 @@ class Matrica:
                             openList.pop(nadjen[0])
                             openList[nadjen[0]] = f + distance
             closedList.append(nodeTup)
+        path = []
         if found_node:
-            return True
-        return False
+            tmpTup = endTup
+            while (tmpTup is not None): 
+                path.append(tmpTup)
+                tmpTup = prev_nodes[tmpTup]
+            
+            return path
+        return path
 
     def isBlocking(self):
         '''Returns True if there is no path, False if there is path'''
-        if not self.A_star(self.playerX,1,self.startPosO1):
+        path = self.A_star(self.playerX,1,self.startPosO1)
+        if len(path) == 0:
             return True
-        if not self.A_star(self.playerX,1,self.startPosO2):
+        path = self.A_star(self.playerX,1,self.startPosO2)
+        if len(path) == 0:
             return True
-        if not self.A_star(self.playerX,2,self.startPosO1):
+        path = self.A_star(self.playerX,2,self.startPosO1)
+        if len(path) == 0:
             return True
-        if not self.A_star(self.playerX,2,self.startPosO2):
+        path = self.A_star(self.playerX,2,self.startPosO2)
+        if len(path) == 0:
             return True
-
-        if not self.A_star(self.playerO,1,self.startPosX1):
+        path = self.A_star(self.playerO,1,self.startPosX1)
+        if len(path) == 0:
             return True
-        if not self.A_star(self.playerO,1,self.startPosX2):
+        path = self.A_star(self.playerO,1,self.startPosX2)
+        if len(path) == 0:
             return True
-        if not self.A_star(self.playerO,2,self.startPosX1):
+        path = self.A_star(self.playerO,2,self.startPosX1)
+        if len(path) == 0:
             return True
-        if not self.A_star(self.playerO,2,self.startPosX2):
+        path = self.A_star(self.playerO,2,self.startPosX2)
+        if len(path) == 0:
             return True
         return False
     
