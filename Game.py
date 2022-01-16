@@ -73,7 +73,9 @@ class Game:
                 currentPlayer = self.playTurn(self.matrica.playerX)
                 self.onTurn = 'O'
             else:
-                currentPlayer = self.playComputer(self.matrica.playerO)
+                currentPlayer = self.playTurn(self.matrica.playerO)
+
+                # currentPlayer = self.playComputer(self.matrica.playerO)
                 self.onTurn = 'X'
 
             if self.isFinishedGame(currentPlayer):
