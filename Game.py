@@ -244,7 +244,8 @@ class Game:
                                 # tmp.printBoard()
                         endAStar = time.perf_counter()
                         return endAStar - startAStar
-
+                    #da li  zidn nije  u okolini puta 
+                        #continue
                     naruto = player.clone()
                     if playersClones[ind].hasWalls(0):
                         time_A_star += addMatrix(mat,i,j,0,naruto,matriceNewState)
