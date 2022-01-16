@@ -73,9 +73,7 @@ class Game:
                 currentPlayer = self.playTurn(self.matrica.playerX)
                 self.onTurn = 'O'
             else:
-                currentPlayer = self.playTurn(self.matrica.playerO)
-
-                # currentPlayer = self.playComputer(self.matrica.playerO)
+                currentPlayer = self.playComputer(self.matrica.playerO)
                 self.onTurn = 'X'
 
             if self.isFinishedGame(currentPlayer):
@@ -199,13 +197,13 @@ class Game:
         expandedPut.append(put[len(put)-1])
         return expandedPut
 
-    def generateSetOfPossibleWallsForOne(self, expPut:List[List[int]]):
+    def generateSetOfPossibleWallsForOne(self, expPut:List):
         setOfPossibleWalls=set()
         for i in expPut:
-            setOfPossibleWalls.add([i[0],i[1]])
-            setOfPossibleWalls.add([i[0],i[1]-1])
-            setOfPossibleWalls.add([i[0]-1,i[1]-1])
-            setOfPossibleWalls.add([i[0]-1,i[1]])
+            setOfPossibleWalls.add((i[0],i[1]))
+            setOfPossibleWalls.add((i[0],i[1]-1))
+            setOfPossibleWalls.add((i[0]-1,i[1]-1))
+            setOfPossibleWalls.add((i[0]-1,i[1]))
         return setOfPossibleWalls
 
     def generateSetOfPossibleWalls(self, put1:List[List[int]],put2:List[List[int]],put3:List[List[int]],put4:List[List[int]]):
@@ -261,40 +259,49 @@ class Game:
             endGeneralTime = time.perf_counter()
             print(f'General time: {endGeneralTime - startGeneralTime}')
             return clonedMatrice
-               
-        #ako ima zidova
+
+        list1 = self.matrica.A_star(self.matrica.playerX,1,self.matrica.startPosO1)
+        list2 = self.matrica.A_star(self.matrica.playerX,1,self.matrica.startPosO2)
+        list3 = self.matrica.A_star(self.matrica.playerX,2,self.matrica.startPosO1)
+        list4 = self.matrica.A_star(self.matrica.playerX,2,self.matrica.startPosO2)
+        setSvihZidova = self.generateSetOfPossibleWalls(list1, list2, list3, list4)
+        print(list1)
+        print(list2)
+        print(list3)
+        print(list4)
+
         time_A_star = 0
+
+        def addMatrix(mat: Matrica, i,j,wallType,player, matriceNewState):
+            startAStar = time.perf_counter()
+            tmp = mat.clone()
+            tr= tmp.PutWall(player,wallType,[i,j])
+            
+            if tr:
+                matriceNewState.append(tmp)
+                # print('------')
+                # tmp.printBoard()
+            endAStar = time.perf_counter()
+            return endAStar - startAStar
+
         for ind in range(0,len(clonedMatrice)):
-            mat=clonedMatrice[ind]
-            for i in range(0,mat.dimX-1):
-                for j in range(0,mat.dimY-1):
-                    
-                    def addMatrix(mat: Matrica, i,j,wallType,player, matriceNewState):
-                        startAStar = time.perf_counter()
-                        if mat.validateWall(wallType, [i,j]):
-                            tmp = mat.clone()
-                            tr= tmp.PutWall(player,wallType,[i,j])
-                            
-                            if tr:
-                                matriceNewState.append(tmp)
-                                # print('------')
-                                # tmp.printBoard()
-                        endAStar = time.perf_counter()
-                        return endAStar - startAStar
-                    #da li  zidn nije  u okolini puta 
-                        #continue
-                    naruto = player.clone()
-                    if playersClones[ind].hasWalls(0):
-                        time_A_star += addMatrix(mat,i,j,0,naruto,matriceNewState)
-                       
-                    if playersClones[ind].hasWalls(1):
-                        time_A_star += addMatrix(mat,i,j,1,naruto,matriceNewState)
+            mat = clonedMatrice[ind]
+            for par in setSvihZidova:
+                tmpLista = list(par)
+                
+                if playersClones[ind].hasWalls(0) and mat.validateWall(0, tmpLista):
+                    #kloniranje i postavljanje zida
+                    naruto = playersClones[ind].clone()
+                    time_A_star += addMatrix(mat,tmpLista[0],tmpLista[1],0,naruto,matriceNewState)
+                if playersClones[ind].hasWalls(1) and mat.validateWall(1, tmpLista):
+                    #kloniranje i postavljanje zida
+                    naruto = playersClones[ind].clone()
+                    time_A_star += addMatrix(mat,tmpLista[0],tmpLista[1],1,naruto,matriceNewState)
+
                     
         endGeneralTime = time.perf_counter()
         print(f'General time: {endGeneralTime - startGeneralTime}')
         print(f'A_star time: {time_A_star}')
-
-        
         return matriceNewState               
 
     def minimax(self, state: Matrica, depth: int,alfa:int, beta:int, player: Player):
@@ -351,8 +358,8 @@ class Game:
 
 
 game = Game()
-# game.matrixInit()
-# game.playGame()
+game.matrixInit()
+game.playGame()
 
-print(game.generateExpandedPath([(3,9),(4,9),(4,7),(4,5),(6,5),(7,4),(6,3)]))
+# print(game.generateExpandedPath([(3,9),(4,9),(4,7),(4,5),(6,5),(7,4),(6,3)]))
 #test komentar u moving&validating grani 

@@ -242,14 +242,14 @@ class Matrica:
 
         if wallType ==0:
             #zid izvan tabele  
-            if(zX>self.dimX and zY>self.dimY) or (zX>self.dimX and zY+1>self.dimY):
+            if(zX>=self.dimX or zY>=self.dimY or zY+1>=self.dimY or zX<0 or zY<0):
                 return False
             #horizontalni zid da li se poklapa sa drugim
             if self.mat[zX][zY].bottomWall==True or self.mat[zX][zY+1].bottomWall==True:
                 return False 
         else:
             #zid izvan tabele    
-            if (zX>self.dimX and zY>self.dimY) or (zX+1>self.dimX and zY>self.dimY):
+            if (zX>=self.dimX or zY>=self.dimY or zX+1>=self.dimX  or zX<0 or zY<0):
                 return False
             #vertikalni zid da li se poklapa sa drugim
             if self.mat[zX][zY].rightWall==True or self.mat[zX+1][zY].rightWall==True:
