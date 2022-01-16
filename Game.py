@@ -90,6 +90,7 @@ class Game:
 #dodati funkciju koja odigrava potez kompjutera
     def playComputer(self, player: Player):
         timePcStart = time.perf_counter()
+        print("PC is thinking..")
         tmp = self.minimax(self.matrica, 2, -1000, 1000, player)
         self.matrica = tmp[0]
         # self.players['O'] = tmp[0].playerO

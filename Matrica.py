@@ -1,3 +1,4 @@
+from cmath import sqrt
 import copy
 from typing import List, Tuple
 from Cell import *
@@ -127,10 +128,19 @@ class Matrica:
             return False
     def calcHeuristic(self,start: List[int], end: List[int]) -> int:
         '''Manhatan heuristika, suma, abs, cilj - start'''
-        result = 0
-        for i in [0,1]:
-            result += abs(end[i] - start[i])
-        return result
+    
+
+        dx = abs(start[0] - end[0])
+        dy = abs(start[1] - end[1])
+        D = 1
+        D2 = 1.41421356237
+        h = D * (dx + dy) + (D2 - 2 * D) * min(dx, dy)
+        # where D is length of each node(usually = 1) and D2 is diagonal distance between each node (usually = sqrt(2) ). 
+        return h
+        # result = 0
+        # for i in [0,1]:
+        #     result += abs(end[i] - start[i])
+        # return result
 
 
     
