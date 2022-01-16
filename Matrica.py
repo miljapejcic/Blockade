@@ -141,10 +141,14 @@ class Matrica:
         # self.printBoard()
         pawn = player.getPawn(pawnNo)
         start = pawn.getPositions()
-        if start == end:
-            return True
+        path = []
         startTup = tuple(start)
         endTup = tuple(end)
+
+        if start == end:
+            path.append(endTup)
+            path.append(startTup)
+            return path
         found_node = False
         openList = dict()
         closedList = []
@@ -194,7 +198,6 @@ class Matrica:
                             openList.pop(nadjen[0])
                             openList[nadjen[0]] = f + distance
             closedList.append(nodeTup)
-        path = []
         if found_node:
             tmpTup = endTup
             while (tmpTup is not None): 
