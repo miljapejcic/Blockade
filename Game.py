@@ -182,6 +182,41 @@ class Game:
 
         return statesPawn1 + statesPawn2
 
+    def generateExpandedPath(self, put:List):
+        expandedPut=[]
+        for i in range(0,len(put)-1):
+            expandedPut.append(put[i])
+            if (put[i][0]==put[i+1][0]) and (abs(put[i][1]-put[i+1][1])==2):
+                tmp=int((put[i][1]+put[i+1][1])/2)
+                noviEl = (put[i][0],tmp)
+                expandedPut.append(noviEl)
+            elif (put[i][1]==put[i+1][1]) and (abs(put[i][0]-put[i+1][0])==2):
+                tmp=int((put[i][0]+put[i+1][0])/2)
+                noviEl = (tmp, put[i][1])
+                expandedPut.append(noviEl)
+        expandedPut.append(put[len(put)-1])
+        return expandedPut
+
+    def generateSetOfPossibleWallsForOne(self, expPut:List[List[int]]):
+        setOfPossibleWalls=set()
+        for i in expPut:
+            setOfPossibleWalls.add([i[0],i[1]])
+            setOfPossibleWalls.add([i[0],i[1]-1])
+            setOfPossibleWalls.add([i[0]-1,i[1]-1])
+            setOfPossibleWalls.add([i[0]-1,i[1]])
+        return setOfPossibleWalls
+
+    def generateSetOfPossibleWalls(self, put1:List[List[int]],put2:List[List[int]],put3:List[List[int]],put4:List[List[int]]):
+        ePut1=self.generateExpandedPath(put1)
+        ePut2=self.generateExpandedPath(put2)
+        ePut3=self.generateExpandedPath(put3)
+        ePut4=self.generateExpandedPath(put4)
+        setOfPossibleWalls = set()
+        setOfPossibleWalls.update(self.generateSetOfPossibleWallsForOne(ePut1))
+        setOfPossibleWalls.update(self.generateSetOfPossibleWallsForOne(ePut2))
+        setOfPossibleWalls.update(self.generateSetOfPossibleWallsForOne(ePut3))
+        setOfPossibleWalls.update(self.generateSetOfPossibleWallsForOne(ePut4))
+        return setOfPossibleWalls
 
     def generateStatesForPawn(self, player : Player, pawnNo, state:Matrica)-> List[Matrica]:
         ''' Funckija vraca sve validna stanja za jednog pesaka'''
@@ -314,6 +349,8 @@ class Game:
 
 
 game = Game()
-game.matrixInit()
-game.playGame()
+# game.matrixInit()
+# game.playGame()
+
+print(game.generateExpandedPath([(3,9),(4,9),(4,7),(4,5),(6,5),(7,4),(6,3)]))
 #test komentar u moving&validating grani 
