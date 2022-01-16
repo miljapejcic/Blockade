@@ -1,3 +1,4 @@
+from threading import Timer
 from Matrica import * 
 import itertools
 import time
@@ -86,9 +87,12 @@ class Game:
 
 #dodati funkciju koja odigrava potez kompjutera
     def playComputer(self, player: Player):
+        timePcStart = time.perf_counter()
         tmp = self.minimax(self.matrica, 2, -1000, 1000, player)
         self.matrica = tmp[0]
         self.printBoard()
+        timePcEnd = time.perf_counter()
+        print(f'General PC time: {timePcEnd - timePcStart}')
         return self.matrica.playerO
 
 
@@ -176,9 +180,9 @@ class Game:
 
     def generateNewStates(self,player:Player, state:Matrica):
         statesPawn1 = self.generateStatesForPawn(player,1, state)
-        print(f'Counter == {len(statesPawn1)}')
+        # print(f'Counter == {len(statesPawn1)}')
         statesPawn2 = self.generateStatesForPawn(player,2, state)
-        print(f'Counter == {len(statesPawn2)}')
+        # print(f'Counter == {len(statesPawn2)}')
 
         return statesPawn1 + statesPawn2
 
@@ -225,9 +229,8 @@ class Game:
         #i odigraj potez map fja 
         #vrati klon matrice 
 
-        print("Starting generating matrices...")
         
-        startGeneralTime = time.perf_counter()
+        # startGeneralTime = time.perf_counter()
         pawn= player.getPawn(pawnNo)
         x=pawn.x #ovo se ne koristi
         y=pawn.y
@@ -256,8 +259,8 @@ class Game:
         #ako nema zidova    
         if not player.hasAnyWalls():  
                     
-            endGeneralTime = time.perf_counter()
-            print(f'General time: {endGeneralTime - startGeneralTime}')
+            # endGeneralTime = time.perf_counter()
+            # print(f'General time: {endGeneralTime - startGeneralTime}')
             return clonedMatrice
 
         list1 = self.matrica.A_star(self.matrica.playerX,1,self.matrica.startPosO1)
@@ -273,7 +276,7 @@ class Game:
         time_A_star = 0
 
         def addMatrix(mat: Matrica, i,j,wallType,player, matriceNewState):
-            startAStar = time.perf_counter()
+            # startAStar = time.perf_counter()
             tmp = mat.clone()
             tr= tmp.PutWall(player,wallType,[i,j])
             
@@ -281,8 +284,8 @@ class Game:
                 matriceNewState.append(tmp)
                 # print('------')
                 # tmp.printBoard()
-            endAStar = time.perf_counter()
-            return endAStar - startAStar
+            # endAStar = time.perf_counter()
+            # return endAStar - startAStar
 
         for ind in range(0,len(clonedMatrice)):
             mat = clonedMatrice[ind]
@@ -292,16 +295,16 @@ class Game:
                 if playersClones[ind].hasWalls(0) and mat.validateWall(0, tmpLista):
                     #kloniranje i postavljanje zida
                     naruto = playersClones[ind].clone()
-                    time_A_star += addMatrix(mat,tmpLista[0],tmpLista[1],0,naruto,matriceNewState)
+                    addMatrix(mat,tmpLista[0],tmpLista[1],0,naruto,matriceNewState)
                 if playersClones[ind].hasWalls(1) and mat.validateWall(1, tmpLista):
                     #kloniranje i postavljanje zida
                     naruto = playersClones[ind].clone()
-                    time_A_star += addMatrix(mat,tmpLista[0],tmpLista[1],1,naruto,matriceNewState)
+                    addMatrix(mat,tmpLista[0],tmpLista[1],1,naruto,matriceNewState)
 
                     
         endGeneralTime = time.perf_counter()
-        print(f'General time: {endGeneralTime - startGeneralTime}')
-        print(f'A_star time: {time_A_star}')
+        # print(f'General time: {endGeneralTime - startGeneralTime}')
+        # print(f'A_star time: {time_A_star}')
         return matriceNewState               
 
     def minimax(self, state: Matrica, depth: int,alfa:int, beta:int, player: Player):
