@@ -48,5 +48,7 @@ class Player:
 
     def clone(self):
         player = Player(self.sign,self.wallNums)
+        player.vertWallNum = self.vertWallNum
+        player.horWallNum = self.horWallNum
         player.AddPawns(self.pawn1.clone(),self.pawn2.clone())
         return player
