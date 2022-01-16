@@ -72,9 +72,11 @@ class Game:
         while True:
             if self.onTurn == 'X':
                 currentPlayer = self.playTurn(self.matrica.playerX)
+                self.players['X'] = currentPlayer
                 self.onTurn = 'O'
             else:
                 currentPlayer = self.playComputer(self.matrica.playerO)
+                self.players['O'] = currentPlayer
                 self.onTurn = 'X'
 
             if self.isFinishedGame(currentPlayer):
@@ -90,6 +92,7 @@ class Game:
         timePcStart = time.perf_counter()
         tmp = self.minimax(self.matrica, 2, -1000, 1000, player)
         self.matrica = tmp[0]
+        # self.players['O'] = tmp[0].playerO
         self.printBoard()
         timePcEnd = time.perf_counter()
         print(f'General PC time: {timePcEnd - timePcStart}')
@@ -242,14 +245,14 @@ class Game:
             clonedMatrice.append(self.cloneMatrix(state)) #nekaMat.clone()   self.Clone(nekaMat)
             playersClones.append(player.clone())
             #OVO SAM JEDINO MENJALA
-            if player.sign == 'X':
-                plO = state.playerO.clone()
-                clonedMatrice[i].addPlayers(playersClones[i], plO)
-                clonedMatrice[i].movePawn(clonedMatrice[i].playerX, pawnNo,validMoves[i])
-            else:
-                plX = state.playerX.clone()
-                clonedMatrice[i].addPlayers(plX, playersClones[i])
-                clonedMatrice[i].movePawn(clonedMatrice[i].playerO,pawnNo,validMoves[i])
+            # if player.sign == 'X':
+            #     plO = state.playerO.clone()
+            #     clonedMatrice[i].addPlayers(playersClones[i], plO)
+            #     clonedMatrice[i].movePawn(clonedMatrice[i].playerX, pawnNo,validMoves[i])
+            # else:
+            plX = state.playerX.clone()
+            clonedMatrice[i].addPlayers(plX, playersClones[i])
+            clonedMatrice[i].movePawn(clonedMatrice[i].playerO,pawnNo,validMoves[i])
                 
             # clonedMatrice[i].movePawn(playersClones[i],pawnNo,validMoves[i])
             # print('------')
@@ -278,6 +281,8 @@ class Game:
         def addMatrix(mat: Matrica, i,j,wallType,player, matriceNewState):
             # startAStar = time.perf_counter()
             tmp = mat.clone()
+            plX = self.players['X'].clone()
+            tmp.addPlayers(plX, player)
             tr= tmp.PutWall(player,wallType,[i,j])
             
             if tr:
@@ -311,9 +316,9 @@ class Game:
         #procena stanja, vracanje procene za krajnje stanje
         if depth == 0 or self.isFinishedGame(player): 
             if player.sign== 'X':
-                return [state, self.procenaStanja(state.playerX, state.startPosO1, state.startPosO2)]
+                return [state, self.procenaStanja(state, state.playerX, state.startPosO1, state.startPosO2)]
             else:
-                 return [state, self.procenaStanja(state.playerO, state.startPosX1, state.startPosX2)]
+                 return [state, self.procenaStanja(state, state.playerO, state.startPosX1, state.startPosX2)]
         tmpMatrica = state
         # clonedPlayer = player.clone()
         children = self.generateNewStates(player, state)
@@ -344,7 +349,7 @@ class Game:
                     break
             return [tmpMatrica,minEval]
         
-    def procenaStanja(self, player: Player, cilj1: List[int], cilj2: List[int])-> int:
+    def procenaStanja(self, state:Matrica, player: Player, cilj1: List[int], cilj2: List[int])-> int:
         dist=0
         distX1C1= self.calcDistance(player.pawn1.getPositions(),cilj1) #razdaljina izmedju x1 i c1
         distX1C2= self.calcDistance(player.pawn1.getPositions(),cilj2) #raz izmedju x1 i c2
