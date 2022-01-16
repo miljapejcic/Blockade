@@ -432,7 +432,7 @@ class Matrica:
         tmpPawn = Pawn([pawn.x + xDir, pawn.y])
         wallsBetween_X = self.areWallsBetwween(pawn, tmpPawn,xDir,0)
         
-        pawn = tmpPawn
+        pawn = Pawn(tmpPawn.getPositions())
         tmpPawn.y = tmpPawn.y + yDir
         wallsBetween_Y = self.areWallsBetwween(pawn, tmpPawn,0,yDir)
         
@@ -446,7 +446,7 @@ class Matrica:
         tmpPawn = Pawn([pawn.x, pawn.y + yDir])
         wallsBetween_Y = self.areWallsBetwween(pawn, tmpPawn,0,yDir)
        
-        pawn = tmpPawn
+        pawn = Pawn(tmpPawn.getPositions())
         tmpPawn.x = tmpPawn.x + xDir
         wallsBetween_X = self.areWallsBetwween(pawn, tmpPawn,xDir,0)
 
