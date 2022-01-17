@@ -156,7 +156,6 @@ class Matrica:
         endTup = tuple(end)
 
         if start == end:
-            path.append(endTup)
             path.append(startTup)
             return path
         found_node = False

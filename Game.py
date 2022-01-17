@@ -246,14 +246,14 @@ class Game:
             clonedMatrice.append(self.cloneMatrix(state)) #nekaMat.clone()   self.Clone(nekaMat)
             playersClones.append(player.clone())
             #OVO SAM JEDINO MENJALA
-            # if player.sign == 'X':
-            #     plO = state.playerO.clone()
-            #     clonedMatrice[i].addPlayers(playersClones[i], plO)
-            #     clonedMatrice[i].movePawn(clonedMatrice[i].playerX, pawnNo,validMoves[i])
-            # else:
-            plX = state.playerX.clone()
-            clonedMatrice[i].addPlayers(plX, playersClones[i])
-            clonedMatrice[i].movePawn(clonedMatrice[i].playerO,pawnNo,validMoves[i])
+            if player.sign == 'X':
+                plO = state.playerO.clone()
+                clonedMatrice[i].addPlayers(playersClones[i], plO)
+                clonedMatrice[i].movePawn(clonedMatrice[i].playerX, pawnNo,validMoves[i])
+            else:
+                plX = state.playerX.clone()
+                clonedMatrice[i].addPlayers(plX, playersClones[i])
+                clonedMatrice[i].movePawn(clonedMatrice[i].playerO,pawnNo,validMoves[i])
                 
             # clonedMatrice[i].movePawn(playersClones[i],pawnNo,validMoves[i])
             # print('------')
@@ -267,23 +267,33 @@ class Game:
             # print(f'General time: {endGeneralTime - startGeneralTime}')
             return clonedMatrice
 
-        list1 = self.matrica.A_star(self.matrica.playerX,1,self.matrica.startPosO1)
-        list2 = self.matrica.A_star(self.matrica.playerX,1,self.matrica.startPosO2)
-        list3 = self.matrica.A_star(self.matrica.playerX,2,self.matrica.startPosO1)
-        list4 = self.matrica.A_star(self.matrica.playerX,2,self.matrica.startPosO2)
-        setSvihZidova = self.generateSetOfPossibleWalls(list1, list2, list3, list4)
-        print(list1)
-        print(list2)
-        print(list3)
-        print(list4)
+        setSvihZidova=set()
+
+        if player.sign == 'X':
+            list1 = self.matrica.A_star(self.matrica.playerX,1,self.matrica.startPosO1)
+            list2 = self.matrica.A_star(self.matrica.playerX,1,self.matrica.startPosO2)
+            list3 = self.matrica.A_star(self.matrica.playerX,2,self.matrica.startPosO1)
+            list4 = self.matrica.A_star(self.matrica.playerX,2,self.matrica.startPosO2)
+            setSvihZidova = self.generateSetOfPossibleWalls(list1, list2, list3, list4)
+        else:
+            list1 = self.matrica.A_star(self.matrica.playerO,1,self.matrica.startPosX1)
+            list2 = self.matrica.A_star(self.matrica.playerO,1,self.matrica.startPosX2)
+            list3 = self.matrica.A_star(self.matrica.playerO,2,self.matrica.startPosX1)
+            list4 = self.matrica.A_star(self.matrica.playerO,2,self.matrica.startPosX2)
+            setSvihZidova = self.generateSetOfPossibleWalls(list1, list2, list3, list4)
 
         time_A_star = 0
 
         def addMatrix(mat: Matrica, i,j,wallType,player, matriceNewState):
             # startAStar = time.perf_counter()
             tmp = mat.clone()
-            plX = self.players['X'].clone()
-            tmp.addPlayers(plX, player)
+            if player.sign=='X':
+                plO = self.players['O'].clone()
+                tmp.addPlayers(player, plO)
+            else:
+                plX = self.players['X'].clone()
+                tmp.addPlayers(plX, player)
+                
             tr= tmp.PutWall(player,wallType,[i,j])
             
             if tr:
@@ -319,15 +329,15 @@ class Game:
             if player.sign== 'X':
                 return [state, self.procenaStanja(state, state.playerX, state.startPosO1, state.startPosO2)]
             else:
-                 return [state, self.procenaStanja(state, state.playerO, state.startPosX1, state.startPosX2)]
+                return [state, self.procenaStanja(state, state.playerO, state.startPosX1, state.startPosX2)]
         tmpMatrica = state
         # clonedPlayer = player.clone()
         children = self.generateNewStates(player, state)
         if player.sign == 'O':
             maxEval= -1000
             for child in children:
-                plX = child.playerX.clone()
-                eval=self.minimax(child, depth-1, alfa, beta, plX)
+                # plX = child.playerX.clone()
+                eval=self.minimax(child, depth-1, alfa, beta, child.playerX)
                 if eval[1] > maxEval:
                     maxEval = eval[1]
                     tmpMatrica = child
@@ -339,8 +349,8 @@ class Game:
         else:
             minEval=1000
             for child in children:
-                plO = child.playerO.clone()
-                eval=self.minimax(child, depth-1, alfa, beta, plO)
+                # plO = child.playerO.clone()
+                eval=self.minimax(child, depth-1, alfa, beta, child.playerO)
                 # minEval=max(minEval, eval[1])
                 if eval[1] < minEval:
                     minEval = eval[1]
@@ -352,10 +362,14 @@ class Game:
         
     def procenaStanja(self, state:Matrica, player: Player, cilj1: List[int], cilj2: List[int])-> int:
         dist=0
-        distX1C1= self.calcDistance(player.pawn1.getPositions(),cilj1) #razdaljina izmedju x1 i c1
-        distX1C2= self.calcDistance(player.pawn1.getPositions(),cilj2) #raz izmedju x1 i c2
-        distX2C1= self.calcDistance(player.pawn2.getPositions(),cilj1) #raz izmedju x2 i c1
-        distX2C2= self.calcDistance(player.pawn2.getPositions(),cilj2) #raz izmedju x2 i c2
+        list1 = state.A_star(player,1,cilj1)
+        list2 = state.A_star(player,1,cilj2)
+        list3 = state.A_star(player,2,cilj1)
+        list4 = state.A_star(player,2,cilj2)
+        distX1C1= 0 if len(list1)==1 else len(list1)#razdaljina izmedju x1 i c1
+        distX1C2= 0 if len(list2)==1 else len(list2)  #raz izmedju x1 i c2
+        distX2C1= 0 if len(list3)==1 else len(list3)  #raz izmedju x2 i c1
+        distX2C2= 0 if len(list4)==1 else len(list4)  #raz izmedju x2 i c2
         dist= min(min(distX1C1,distX1C2), min(distX2C1, distX2C2))
         return dist
 
