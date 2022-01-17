@@ -325,7 +325,7 @@ class Game:
 
     def minimax(self, state: Matrica, depth: int,alfa:int, beta:int, player: Player):
         #procena stanja, vracanje procene za krajnje stanje
-        if depth == 0 or self.isFinishedGame(player): 
+        if depth == 0 or self.isFinishedGameOnCurrentState(state,player): 
             if player.sign== 'X':
                 return [state, self.procenaStanja(state, state.playerX, state.startPosO1, state.startPosO2)]
             else:
@@ -360,16 +360,19 @@ class Game:
                     break
             return [tmpMatrica,minEval]
         
+    def isFinishedGameOnCurrentState(self, state:Matrica,player:Player):
+        return state.isEndOfGame(player)
+
     def procenaStanja(self, state:Matrica, player: Player, cilj1: List[int], cilj2: List[int])-> int:
         dist=0
         list1 = state.A_star(player,1,cilj1)
         list2 = state.A_star(player,1,cilj2)
         list3 = state.A_star(player,2,cilj1)
         list4 = state.A_star(player,2,cilj2)
-        distX1C1= 0 if len(list1)==1 else len(list1)#razdaljina izmedju x1 i c1
-        distX1C2= 0 if len(list2)==1 else len(list2)  #raz izmedju x1 i c2
-        distX2C1= 0 if len(list3)==1 else len(list3)  #raz izmedju x2 i c1
-        distX2C2= 0 if len(list4)==1 else len(list4)  #raz izmedju x2 i c2
+        distX1C1 = len(list1)#razdaljina izmedju x1 i c1
+        distX1C2 = len(list2)  #raz izmedju x1 i c2
+        distX2C1 = len(list3)  #raz izmedju x2 i c1
+        distX2C2 = len(list4)  #raz izmedju x2 i c2
         dist= min(min(distX1C1,distX1C2), min(distX2C1, distX2C2))
         return dist
 
