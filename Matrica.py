@@ -1,4 +1,4 @@
-from cmath import sqrt
+import math
 import copy
 from typing import List, Tuple
 from Cell import *
@@ -129,21 +129,11 @@ class Matrica:
     def calcHeuristic(self,start: List[int], end: List[int]) -> int:
         '''Manhatan heuristika, suma, abs, cilj - start'''
     
+        result = 0
+        for i in [0,1]:
+            result += abs(end[i] - start[i])
+        return result
 
-        dx = abs(start[0] - end[0])
-        dy = abs(start[1] - end[1])
-        D = 1
-        D2 = 1.41421356237
-        h = D * (dx + dy) + (D2 - 2 * D) * min(dx, dy)
-        # where D is length of each node(usually = 1) and D2 is diagonal distance between each node (usually = sqrt(2) ). 
-        return h
-        # result = 0
-        # for i in [0,1]:
-        #     result += abs(end[i] - start[i])
-        # return result
-
-
-    
 
     def A_star(self, player:Player, pawnNo: int, end: List[int]) -> List:
         '''Returns path as a list of tuples if there is one, otherwise returns empty list'''
@@ -186,7 +176,12 @@ class Matrica:
                 moveTmp[0] -= pawnTmp.x #dirX 
                 moveTmp[1] -= pawnTmp.y #dirY
                 if self.validateMove(playerTmp,1,moveTmp[0],moveTmp[1]):
-                    steps =  sum(list(map(lambda x: abs(x),moveTmp)))
+                    steps = 0
+                    if abs(moveTmp[0]) == abs(moveTmp[1]):
+                        steps = 1
+                    else:
+                        steps = sum(list(map(lambda x: abs(x),moveTmp)))
+                    # steps =  sum(list(map(lambda x: abs(x),moveTmp)))
                     distance = g[nodeTup] + steps
                     heur = self.calcHeuristic(move,end)
                     f = distance + heur
