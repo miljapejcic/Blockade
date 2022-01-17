@@ -1,4 +1,5 @@
 from threading import Timer
+from zlib import DEF_BUF_SIZE
 from Matrica import * 
 import itertools
 import time
@@ -91,7 +92,8 @@ class Game:
     def playComputer(self, player: Player):
         timePcStart = time.perf_counter()
         print("PC is thinking..")
-        tmp = self.minimax(self.matrica, 2, -1000, 1000, player)
+        tmp = self.minimax(self.matrica,2,-1000, 1000, player)
+        # tmp = self.minimax2(self.matrica, 2, [self.matrica,-1000],[self.matrica, 1000], player)
         self.matrica = tmp[0]
         # self.players['O'] = tmp[0].playerO
         self.printBoard()
@@ -323,6 +325,39 @@ class Game:
         # print(f'A_star time: {time_A_star}')
         return matriceNewState               
 
+    def max_value(self, state:Matrica, depth:int, alfa, beta, player:Player):
+        #ovoje za O playera
+        if depth == 0 or self.isFinishedGameOnCurrentState(state,player): 
+            return [state, self.procenaStanja(state, state.playerO, state.startPosX1, state.startPosX2)]
+        else:
+            children = self.generateNewStates(player, state)
+            for child in children:
+                eval=self.min_value(child, depth-1, alfa,beta,child.playerX)
+                if alfa[1] < eval[1]:
+                    alfa = eval
+                if alfa[1]>= beta[1]:
+                    return beta
+            return alfa
+
+    def min_value(self, state:Matrica, depth:int, alfa, beta, player:Player):
+        #ovoje za X playera
+        if depth == 0 or self.isFinishedGameOnCurrentState(state,player): 
+            return [state, self.procenaStanja(state, state.playerX, state.startPosO1, state.startPosO2)]
+        else:
+            children = self.generateNewStates(player, state)
+            for child in children:
+                eval=self.max_value(child, depth-1, alfa,beta,child.playerO)
+                if beta[1] > eval[1]:
+                    beta=eval
+                if beta[1]<= alfa[1]:
+                    return alfa
+            return beta
+
+    def minimax2(self, state: Matrica, depth: int,alfa, beta, player: Player):
+        return self.max_value(state, depth, alfa,beta,player)
+
+
+
     def minimax(self, state: Matrica, depth: int,alfa:int, beta:int, player: Player):
         #procena stanja, vracanje procene za krajnje stanje
         if depth == 0 or self.isFinishedGameOnCurrentState(state,player): 
@@ -342,7 +377,7 @@ class Game:
                     maxEval = eval[1]
                     tmpMatrica = child
                 # maxEval=max(maxEval, eval[1])
-                alfa= max(alfa, eval[1])
+                alfa= max(alfa, maxEval)
                 if beta <= alfa:
                     break
             return [tmpMatrica,maxEval]
@@ -355,7 +390,7 @@ class Game:
                 if eval[1] < minEval:
                     minEval = eval[1]
                     tmpMatrica = child
-                beta= min(beta, eval[1])
+                beta= min(beta, minEval)
                 if beta <= alfa:
                     break
             return [tmpMatrica,minEval]

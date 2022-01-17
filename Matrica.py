@@ -176,11 +176,7 @@ class Matrica:
                 moveTmp[0] -= pawnTmp.x #dirX 
                 moveTmp[1] -= pawnTmp.y #dirY
                 if self.validateMove(playerTmp,1,moveTmp[0],moveTmp[1]):
-                    steps = 0
-                    if abs(moveTmp[0]) == abs(moveTmp[1]):
-                        steps = 1
-                    else:
-                        steps = sum(list(map(lambda x: abs(x),moveTmp)))
+                    steps = sum(list(map(lambda x: abs(x),moveTmp)))
                     # steps =  sum(list(map(lambda x: abs(x),moveTmp)))
                     distance = g[nodeTup] + steps
                     heur = self.calcHeuristic(move,end)
