@@ -1,6 +1,8 @@
 from cmath import exp
+from ctypes import sizeof
 from threading import Timer
 from typing import Set
+from winsound import PlaySound
 from zlib import DEF_BUF_SIZE
 from Matrica import * 
 import itertools
@@ -94,7 +96,7 @@ class Game:
     def playComputer(self, player: Player):
         timePcStart = time.perf_counter()
         print("PC is thinking..")
-        tmp = self.minimax(self.matrica,3,1000, -1000, player)
+        tmp = self.minimax(self.matrica,2,1000, -1000, player)
         self.matrica = tmp[0]
         
         self.printBoard()
@@ -259,7 +261,21 @@ class Game:
             tmpNext = (ePut[i+1])
             xDir = tmpNext[0] - tmp[0]
             yDir = tmpNext[1] - tmp[1]
-            # if abs(xDir) == abs(yDir):
+            if abs(xDir) == abs(yDir):
+                if xDir == -1 and yDir == -1:
+                    setOfPossibleWalls.add((tmpNext,0))
+                    setOfPossibleWalls.add((tmpNext,1))
+                if xDir == -1 and yDir == 1:
+                    sused = (tmp[0] - 1,tmp[1])
+                    setOfPossibleWalls.add((sused,0))
+                    setOfPossibleWalls.add((sused,1))
+                if xDir == 1 and yDir == -1: 
+                    sused = (tmp[0],tmp[1]-1)
+                    setOfPossibleWalls.add((sused,0))
+                    setOfPossibleWalls.add((sused,1))
+                if xDir == 1 and yDir == 1:
+                    setOfPossibleWalls.add((tmp,0))
+                    setOfPossibleWalls.add((tmp,1))
             if xDir != 0:
                 if xDir == 1:
                     setOfPossibleWalls.add((tmp,0))
@@ -269,7 +285,6 @@ class Game:
                     setOfPossibleWalls.add((tmpNext,0))
                     sused = (tmpNext[0],tmpNext[1]-1)
                     setOfPossibleWalls.add((sused,0))
-
             if yDir != 0: #yDir != 0
                 if xDir == 1:
                     setOfPossibleWalls.add((tmp,1))
@@ -290,69 +305,73 @@ class Game:
         #i odigraj potez map fja 
         #vrati klon matrice 
 
-        
+        matriceNewState = []
         # startGeneralTime = time.perf_counter()
         pawn= player.getPawn(pawnNo)
         x=pawn.x #ovo se ne koristi
         y=pawn.y
-        validMoves= self.generateMoves(player,pawnNo)
-        playersClones = []
-        clonedMatrice = []
-        matriceNewState =[]
-        for i in range(0, len(validMoves)):
-            clonedMatrice.append(self.cloneMatrix(state)) #nekaMat.clone()   self.Clone(nekaMat)
-            playersClones.append(player.clone())
-            #OVO SAM JEDINO MENJALA
-            if player.sign == 'X':
-                plO = state.playerO.clone()
-                clonedMatrice[i].addPlayers(playersClones[i], plO)
-                clonedMatrice[i].movePawn(clonedMatrice[i].playerX, pawnNo,validMoves[i])
-            else:
-                plX = state.playerX.clone()
-                clonedMatrice[i].addPlayers(plX, playersClones[i])
-                clonedMatrice[i].movePawn(clonedMatrice[i].playerO,pawnNo,validMoves[i])
+        ciljevi = []
+        if player.sign == 'X':
+            cilj1 = state.A_star(player,pawnNo,state.startPosO1)
+            cilj2 = state.A_star(player,pawnNo,state.startPosO2)
+        else: 
+            cilj1 = state.A_star(player,pawnNo,state.startPosX1)
+            cilj2 = state.A_star(player,pawnNo,state.startPosX2)
+        ciljevi.append(cilj1)
+        ciljevi.append(cilj2)
+
+        sizes = []
+        sizes.append(len(cilj1))
+        sizes.append(len(cilj2))
+        minimumSize = 1000
+        ind = -1
+        for i in range(0,2):
+            if sizes[i] < minimumSize:
+                minimumSize = sizes[i]
+                ind = i
+        nextMove = ciljevi[ind].pop() #ovaj mi ne treba 
+        nextMove = ciljevi[ind].pop()
+
+        stateClone = state.clone()
+        playerClone = player.clone()
+        if player.sign=='X':
+            plO = state.playerO.clone()
+            stateClone.addPlayers(playerClone, plO)
+        else:
+            plX = state.playerX.clone()
+            stateClone.addPlayers(plX, player)
+        stateClone.movePawn(playerClone,pawnNo,nextMove)
             
            
            
         #ako nema zidova    
         if not player.hasAnyWalls():  
-            return clonedMatrice
+            return stateClone
 
        
-
-        time_A_star = 0
-
         def addMatrix(mat: Matrica, i,j,wallType,player, matriceNewState):
             # startAStar = time.perf_counter()
             tmp = mat.clone()
             if player.sign=='X':
-                plO = self.players['O'].clone()
+                plO = mat.playerO.clone()
                 tmp.addPlayers(player, plO)
             else:
-                plX = self.players['X'].clone()
+                plX = mat.playerX.clone()
                 tmp.addPlayers(plX, player)
                 
             tr = tmp.PutWall(player,wallType,[i,j])
             
             if tr:
                 matriceNewState.append(tmp)
-               
 
-        for ind in range(0,len(clonedMatrice)):
-            mat = clonedMatrice[ind]
-            for par in setSvihZidova:
-                tmpLista = list(par[0])
-                wallType = par[1]
-                if playersClones[ind].hasWalls(wallType):  #and mat.validateWall(wallType, tmpLista):
-                    #kloniranje i postavljanje zida
-                    naruto = playersClones[ind].clone()
-                    addMatrix(mat,tmpLista[0],tmpLista[1],0,naruto,matriceNewState)
-                
+        for par in setSvihZidova:
+            tmpLista = list(par[0])
+            wallType = par[1]
+            if playerClone.hasWalls(wallType):  #and mat.validateWall(wallType, tmpLista):
+                #kloniranje i postavljanje zida
+                naruto = playerClone.clone()
+                addMatrix(stateClone,tmpLista[0],tmpLista[1],wallType,naruto,matriceNewState)
 
-                    
-        endGeneralTime = time.perf_counter()
-        # print(f'General time: {endGeneralTime - startGeneralTime}')
-        # print(f'A_star time: {time_A_star}')
         return matriceNewState               
 
 
