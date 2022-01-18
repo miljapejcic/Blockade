@@ -1,4 +1,6 @@
+from cmath import exp
 from threading import Timer
+from typing import Set
 from zlib import DEF_BUF_SIZE
 from Matrica import * 
 import itertools
@@ -92,10 +94,9 @@ class Game:
     def playComputer(self, player: Player):
         timePcStart = time.perf_counter()
         print("PC is thinking..")
-        tmp = self.minimax(self.matrica,2,-1000, 1000, player)
-        # tmp = self.minimax2(self.matrica, 2, [self.matrica,-1000],[self.matrica, 1000], player)
+        tmp = self.minimax(self.matrica,3,1000, -1000, player)
         self.matrica = tmp[0]
-        # self.players['O'] = tmp[0].playerO
+        
         self.printBoard()
         timePcEnd = time.perf_counter()
         print(f'General PC time: {timePcEnd - timePcStart}')
@@ -105,11 +106,9 @@ class Game:
 
     def playTurn(self, player: Player) -> Player: 
         '''Player (Human or Computer) plays the turns'''
-        #prvo cemo da napravimo da radi PvP
-        # moveDone = False
+       
         print(f"Trenutno igra {player.sign} \n")
-        # if player.sign == 'O': #ovo obrisati ako je sve testirano
-        #     self.generateNewStates(player) 
+        
         movePawnDone = False
         while not movePawnDone:
             pawnNo = int(input("Izaberi pesaka(1 ili 2): "))
@@ -124,6 +123,8 @@ class Game:
                 pawn = player.getPawn(pawnNo)
                 if self.matrica.movePawn(player, pawnNo, [pawn.x + xDir, pawn.y + yDir]):
                     movePawnDone = True
+                   
+
                     self.printMove(player, pawnNo)
                     self.printBoard()
             else:
@@ -141,6 +142,8 @@ class Game:
                     wallPositions = [int(wallX), int(wallY)]
                     if self.matrica.validateWall(wallType, wallPositions):
                         if self.matrica.PutWall(player, wallType, wallPositions):
+                           
+                            
                             self.printWall(player,wallType,wallPositions)
                             self.printBoard()
                             putWallDone = True
@@ -150,7 +153,9 @@ class Game:
                         print("Nevalidna pozicija zida!")
                 else:     
                     print("Nemate trazeni tip zida!")
+
         return player
+
 
     def printMove(self, player: Player, pawnNo: int):
         pawn = player.getPawn(pawnNo)
@@ -184,10 +189,44 @@ class Game:
                 validMoves.append(move)
         return validMoves
 
+
+    def generateAllWalls(self,player,state: Matrica) -> Set: 
+        '''Generating all possible walls for shortest path for opponent'''
+        setSvihZidova=set()
+        lists = []
+        sizes = []
+
+        if player.sign == 'X':
+            lists.insert(0, state.A_star(state.playerO,1,state.startPosX1))
+            lists.insert(1, state.A_star(state.playerO,1,state.startPosX2))
+            lists.insert(2, state.A_star(state.playerO,2,state.startPosX1))
+            lists.insert(3, state.A_star(state.playerO,2,state.startPosX2))
+        else:
+            lists.insert(0, state.A_star(state.playerX,1,state.startPosO1))
+            lists.insert(1, state.A_star(state.playerX,1,state.startPosO2))
+            lists.insert(2, state.A_star(state.playerX,2,state.startPosO1))
+            lists.insert(3, state.A_star(state.playerX,2,state.startPosO2))
+
+        sizes.insert(0,len(lists[0]) - 1)
+        sizes.insert(1,len(lists[1]) - 1)
+        sizes.insert(2,len(lists[2]) - 1)
+        sizes.insert(3,len(lists[3]) - 1)           
+
+        minimumSize = 1000
+        ind = -1
+        for i in range(0,4):
+            if sizes[i] < minimumSize:
+                minimumSize = sizes[i]
+                ind = i
+        setSvihZidova = self.generateSetOfPossibleWalls(lists[ind])
+        setValidnih = set(filter(lambda wall: state.validateWall(wall[1],list(wall[0])),setSvihZidova))
+        return setValidnih
+
     def generateNewStates(self,player:Player, state:Matrica):
-        statesPawn1 = self.generateStatesForPawn(player,1, state)
+        allWalls = self.generateAllWalls(player,state)
+        statesPawn1 = self.generateStatesForPawn(player,1, state, allWalls)
         # print(f'Counter == {len(statesPawn1)}')
-        statesPawn2 = self.generateStatesForPawn(player,2, state)
+        statesPawn2 = self.generateStatesForPawn(player,2, state, allWalls)
         # print(f'Counter == {len(statesPawn2)}')
 
         return statesPawn1 + statesPawn2
@@ -207,28 +246,44 @@ class Game:
         expandedPut.append(put[len(put)-1])
         return expandedPut
 
-    def generateSetOfPossibleWallsForOne(self, expPut:List):
+   
+        
+
+    def generateSetOfPossibleWalls(self, put:List[List[int]]):
+        
+        ePut=self.generateExpandedPath(put)
         setOfPossibleWalls=set()
-        for i in expPut:
-            setOfPossibleWalls.add((i[0],i[1]))
-            setOfPossibleWalls.add((i[0],i[1]-1))
-            setOfPossibleWalls.add((i[0]-1,i[1]-1))
-            setOfPossibleWalls.add((i[0]-1,i[1]))
-        return setOfPossibleWalls
 
-    def generateSetOfPossibleWalls(self, put1:List[List[int]],put2:List[List[int]],put3:List[List[int]],put4:List[List[int]]):
-        ePut1=self.generateExpandedPath(put1)
-        ePut2=self.generateExpandedPath(put2)
-        ePut3=self.generateExpandedPath(put3)
-        ePut4=self.generateExpandedPath(put4)
-        setOfPossibleWalls = set()
-        setOfPossibleWalls.update(self.generateSetOfPossibleWallsForOne(ePut1))
-        setOfPossibleWalls.update(self.generateSetOfPossibleWallsForOne(ePut2))
-        setOfPossibleWalls.update(self.generateSetOfPossibleWallsForOne(ePut3))
-        setOfPossibleWalls.update(self.generateSetOfPossibleWallsForOne(ePut4))
-        return setOfPossibleWalls
+        for i in range (0,len(ePut)-1):
+            tmp = (ePut[i])
+            tmpNext = (ePut[i+1])
+            xDir = tmpNext[0] - tmp[0]
+            yDir = tmpNext[1] - tmp[1]
+            # if abs(xDir) == abs(yDir):
+            if xDir != 0:
+                if xDir == 1:
+                    setOfPossibleWalls.add((tmp,0))
+                    sused = (tmp[0],tmp[1]-1)
+                    setOfPossibleWalls.add((sused,0))
+                else: #xDir == -1
+                    setOfPossibleWalls.add((tmpNext,0))
+                    sused = (tmpNext[0],tmpNext[1]-1)
+                    setOfPossibleWalls.add((sused,0))
 
-    def generateStatesForPawn(self, player : Player, pawnNo, state:Matrica)-> List[Matrica]:
+            if yDir != 0: #yDir != 0
+                if xDir == 1:
+                    setOfPossibleWalls.add((tmp,1))
+                    sused = (tmp[0]-1,tmp[1])
+                    setOfPossibleWalls.add((sused,1))
+                else: #xDir == -1
+                    setOfPossibleWalls.add((tmpNext,1))
+                    sused = (tmpNext[0]-1,tmpNext[1])
+                    setOfPossibleWalls.add((sused,1))
+        
+        return setOfPossibleWalls
+        
+
+    def generateStatesForPawn(self, player : Player, pawnNo, state:Matrica,setSvihZidova: Set)-> List[Matrica]:
         ''' Funckija vraca sve validna stanja za jednog pesaka'''
         #generisi validne porteze 
         #kloniraj matrice map fja 
@@ -256,33 +311,14 @@ class Game:
                 plX = state.playerX.clone()
                 clonedMatrice[i].addPlayers(plX, playersClones[i])
                 clonedMatrice[i].movePawn(clonedMatrice[i].playerO,pawnNo,validMoves[i])
-                
-            # clonedMatrice[i].movePawn(playersClones[i],pawnNo,validMoves[i])
-            # print('------')
-            # clonedMatrice[i].printBoard()
-        # for i in range(0, len(validMoves)):
+            
+           
            
         #ako nema zidova    
         if not player.hasAnyWalls():  
-                    
-            # endGeneralTime = time.perf_counter()
-            # print(f'General time: {endGeneralTime - startGeneralTime}')
             return clonedMatrice
 
-        setSvihZidova=set()
-
-        if player.sign == 'X':
-            list1 = self.matrica.A_star(self.matrica.playerX,1,self.matrica.startPosO1)
-            list2 = self.matrica.A_star(self.matrica.playerX,1,self.matrica.startPosO2)
-            list3 = self.matrica.A_star(self.matrica.playerX,2,self.matrica.startPosO1)
-            list4 = self.matrica.A_star(self.matrica.playerX,2,self.matrica.startPosO2)
-            setSvihZidova = self.generateSetOfPossibleWalls(list1, list2, list3, list4)
-        else:
-            list1 = self.matrica.A_star(self.matrica.playerO,1,self.matrica.startPosX1)
-            list2 = self.matrica.A_star(self.matrica.playerO,1,self.matrica.startPosX2)
-            list3 = self.matrica.A_star(self.matrica.playerO,2,self.matrica.startPosX1)
-            list4 = self.matrica.A_star(self.matrica.playerO,2,self.matrica.startPosX2)
-            setSvihZidova = self.generateSetOfPossibleWalls(list1, list2, list3, list4)
+       
 
         time_A_star = 0
 
@@ -296,28 +332,22 @@ class Game:
                 plX = self.players['X'].clone()
                 tmp.addPlayers(plX, player)
                 
-            tr= tmp.PutWall(player,wallType,[i,j])
+            tr = tmp.PutWall(player,wallType,[i,j])
             
             if tr:
                 matriceNewState.append(tmp)
-                # print('------')
-                # tmp.printBoard()
-            # endAStar = time.perf_counter()
-            # return endAStar - startAStar
+               
 
         for ind in range(0,len(clonedMatrice)):
             mat = clonedMatrice[ind]
             for par in setSvihZidova:
-                tmpLista = list(par)
-                
-                if playersClones[ind].hasWalls(0) and mat.validateWall(0, tmpLista):
+                tmpLista = list(par[0])
+                wallType = par[1]
+                if playersClones[ind].hasWalls(wallType):  #and mat.validateWall(wallType, tmpLista):
                     #kloniranje i postavljanje zida
                     naruto = playersClones[ind].clone()
                     addMatrix(mat,tmpLista[0],tmpLista[1],0,naruto,matriceNewState)
-                if playersClones[ind].hasWalls(1) and mat.validateWall(1, tmpLista):
-                    #kloniranje i postavljanje zida
-                    naruto = playersClones[ind].clone()
-                    addMatrix(mat,tmpLista[0],tmpLista[1],1,naruto,matriceNewState)
+                
 
                     
         endGeneralTime = time.perf_counter()
@@ -325,89 +355,60 @@ class Game:
         # print(f'A_star time: {time_A_star}')
         return matriceNewState               
 
-    def max_value(self, state:Matrica, depth:int, alfa, beta, player:Player):
-        #ovoje za O playera
-        if depth == 0 or self.isFinishedGameOnCurrentState(state,player): 
-            return [state, self.procenaStanja(state, state.playerO, state.startPosX1, state.startPosX2)]
-        else:
-            children = self.generateNewStates(player, state)
-            for child in children:
-                eval=self.min_value(child, depth-1, alfa,beta,child.playerX)
-                if alfa[1] < eval[1]:
-                    alfa = eval
-                if alfa[1]>= beta[1]:
-                    return beta
-            return alfa
-
-    def min_value(self, state:Matrica, depth:int, alfa, beta, player:Player):
-        #ovoje za X playera
-        if depth == 0 or self.isFinishedGameOnCurrentState(state,player): 
-            return [state, self.procenaStanja(state, state.playerX, state.startPosO1, state.startPosO2)]
-        else:
-            children = self.generateNewStates(player, state)
-            for child in children:
-                eval=self.max_value(child, depth-1, alfa,beta,child.playerO)
-                if beta[1] > eval[1]:
-                    beta=eval
-                if beta[1]<= alfa[1]:
-                    return alfa
-            return beta
-
-    def minimax2(self, state: Matrica, depth: int,alfa, beta, player: Player):
-        return self.max_value(state, depth, alfa,beta,player)
-
 
 
     def minimax(self, state: Matrica, depth: int,alfa:int, beta:int, player: Player):
         #procena stanja, vracanje procene za krajnje stanje
-        if depth == 0 or self.isFinishedGameOnCurrentState(state,player): 
-            if player.sign== 'X':
-                return [state, self.procenaStanja(state, state.playerX, state.startPosO1, state.startPosO2)]
-            else:
-                return [state, self.procenaStanja(state, state.playerO, state.startPosX1, state.startPosX2)]
-        tmpMatrica = state
+        if  self.isFinishedGameOnCurrentState(state,player): 
+            return [state,0]
+        if depth == 0:
+           return [state, self.procenaStanja(state, state.playerO, state.startPosX1, state.startPosX2)]
         # clonedPlayer = player.clone()
         children = self.generateNewStates(player, state)
-        if player.sign == 'O':
-            maxEval= -1000
+        if player.sign == 'O': #maximizer
+            bestState = state
+            shortestPath = 1000
             for child in children:
                 # plX = child.playerX.clone()
-                eval=self.minimax(child, depth-1, alfa, beta, child.playerX)
-                if eval[1] > maxEval:
-                    maxEval = eval[1]
-                    tmpMatrica = child
-                # maxEval=max(maxEval, eval[1])
-                alfa= max(alfa, maxEval)
-                if beta <= alfa:
+                value=self.minimax(child, depth-1, alfa, beta, child.playerX)
+                if value[1] < shortestPath:
+                    shortestPath = value[1]
+                    bestState = child
+                alfa= min(alfa, shortestPath)
+                if beta >= alfa: #???
                     break
-            return [tmpMatrica,maxEval]
-        else:
-            minEval=1000
+            return [bestState,shortestPath]
+        else: #player.sign == 'X' #minimizer
+            worstState = state
+            longestPath = -1000
             for child in children:
                 # plO = child.playerO.clone()
-                eval=self.minimax(child, depth-1, alfa, beta, child.playerO)
-                # minEval=max(minEval, eval[1])
-                if eval[1] < minEval:
-                    minEval = eval[1]
-                    tmpMatrica = child
-                beta= min(beta, minEval)
-                if beta <= alfa:
+                value=self.minimax(child, depth-1, alfa, beta, child.playerO)
+                if value[1] > longestPath:
+                    longestPath = value[1]
+                    bestState = child
+                beta= max(beta, longestPath)
+                if beta >= alfa:
                     break
-            return [tmpMatrica,minEval]
+            return [worstState,longestPath]
         
     def isFinishedGameOnCurrentState(self, state:Matrica,player:Player):
         return state.isEndOfGame(player)
 
+   
+
     def procenaStanja(self, state:Matrica, player: Player, cilj1: List[int], cilj2: List[int])-> int:
         dist=0
+        
         list1 = state.A_star(player,1,cilj1)
         list2 = state.A_star(player,1,cilj2)
         list3 = state.A_star(player,2,cilj1)
         list4 = state.A_star(player,2,cilj2)
-        distX1C1 = len(list1)#razdaljina izmedju x1 i c1
-        distX1C2 = len(list2)  #raz izmedju x1 i c2
-        distX2C1 = len(list3)  #raz izmedju x2 i c1
-        distX2C2 = len(list4)  #raz izmedju x2 i c2
+        #zato sto se ukljucuju i prvi i poslednji cvor broj skokova je len - 1
+        distX1C1 = len(list1)-1    #razdaljina izmedju x1 i c1
+        distX1C2 = len(list2)-1    #raz izmedju x1 i c2
+        distX2C1 = len(list3)-1   #raz izmedju x2 i c1
+        distX2C2 = len(list4)-1   #raz izmedju x2 i c2
         dist= min(min(distX1C1,distX1C2), min(distX2C1, distX2C2))
         return dist
 

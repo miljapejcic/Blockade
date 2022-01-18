@@ -20,9 +20,9 @@ class Player:
     def hasWalls(self, wallType: int) -> bool:
         '''WallType == 0 horizontal walls
            walltype == 1 vertical walls'''
-        if wallType == 0 and self.horWallNum != 0:
+        if wallType == 0 and self.horWallNum > 0:
             return True
-        if wallType == 1 and self.vertWallNum != 0:
+        if wallType == 1 and self.vertWallNum > 0:
             return True
         return False
 

@@ -29,10 +29,15 @@ class Matrica:
         self.startPosO1 = o1
         self.startPosO2 = o2
         self.mat = None
+       
+
+       
 
 
     def clone(self):
         klon = Matrica(self.dimX, self.dimY,self.startPosX1,self.startPosX2,self.startPosO1,self.startPosO2)
+       
+
         klon.mat = []
         for i in range(0,klon.dimX):
             klon.mat.append([])
@@ -105,27 +110,7 @@ class Matrica:
             return ' '
          
 
-    def changeStateWithWalls(self, player: Player, pawnNo: int, xDir: int, yDir: int, wallType: int, wallPositions: List[int]) -> bool:
-        '''Promena stanja igre ako validnost uspe, ako ne vratiti false'''
-
-        validMove = self.validateMove(player,pawnNo,xDir,yDir)
-        validWall = self.validateWall(wallType, wallPositions)
-        validString  = "invalid move" if not validMove else "invalid wall" 
-        if validMove and validWall:
-            pawn = player.getPawn(pawnNo)
-            return self.PutWall(player, wallType, wallPositions) and self.movePawn(player, pawnNo, [pawn.x + xDir, pawn.y + yDir])
-        else:
-            print(validString)
-            return False
-        
-    def changeStateWithoutWalls(self, player: Player, pawnNo: int, xDir: int, yDir: int) -> bool:
-        '''Promena stanja igre ako validnost uspe, ako ne vratiti false'''
-
-        if self.validateMove(player,pawnNo,xDir,yDir):
-            pawn = player.getPawn(pawnNo)
-            return self.movePawn(player, pawnNo,[pawn.x + xDir, pawn.y + yDir])
-        else:
-            return False
+   
     def calcHeuristic(self,start: List[int], end: List[int]) -> int:
         '''Manhatan heuristika, suma, abs, cilj - start'''
     
@@ -279,8 +264,12 @@ class Matrica:
         self.mat[x][y].player = player #nova pozicija
         if player.sign == 'X':
             self.playerX.movePawn(pawnNo,x,y)
+            
         else:
             self.playerO.movePawn(pawnNo,x,y)
+        
+
+       
 
         return True
     
@@ -302,6 +291,7 @@ class Matrica:
                 player.horWallNum = player.horWallNum + 1
                 # print("ne smete da blokirate ciljeve ili pesake")
                 return False
+
             return True
         else:
             self.mat[x][y].rightWall = True
@@ -313,6 +303,7 @@ class Matrica:
                 player.vertWallNum = player.vertWallNum + 1
                 # print("ne smete da blokirate ciljeve ili pesake")
                 return False
+            
             return True
 
     def isEndOfGame(self, player: Player) -> bool:
@@ -362,7 +353,7 @@ class Matrica:
                 canJump2 = False  #default-ne vrednosti
            
                 if not self.isOutOfRange(pawn.getPositions(),2*xDir,2*yDir):
-                    canPass2 = self.validateNormalMove(player,pawn.getPositions(),xDir,yDir,2)
+                    canPass2 = self.validateNormalMove(player,pawn.getPositions(),xDir*2,yDir*2,2)
                     canJump2 = self.canJump(player,pawn.x + 2*xDir, pawn.y + 2*yDir)
 
                 #ovaj uslov je jedini od svih mogucih koji dopusta skakanje, samo da canJump to dozvoli 
@@ -410,12 +401,7 @@ class Matrica:
             return True
         else: #some pawn is on that position
             return self.isGoalPosition(sign,cellSign)
-            # if cellSign in ['x','o']: #goal position
-            #     if sign != cellSign: #enemy on that position
-            #         return True #can jump 
-            #     else: 
-            #         return False #my pawn on that position
-            # return False #cannot jump 
+         
 
     def isGoalPosition(self, playerSign: str, cellSign: str)-> bool:
         # sign = player.sign.lower()
