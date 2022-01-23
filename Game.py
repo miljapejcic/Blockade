@@ -96,7 +96,10 @@ class Game:
     def playComputer(self, player: Player):
         timePcStart = time.perf_counter()
         print("PC is thinking..")
-        tmp = self.minimax(self.matrica,2,1000, -1000, player)
+        if player.hasAnyWalls():
+            tmp = self.minimax(self.matrica,2,1000, -1000, player)
+        else:
+            tmp = self.minimax(self.matrixInit,3,1000,-1000,player)
         self.matrica = tmp[0]
         
         self.printBoard()
@@ -398,7 +401,7 @@ class Game:
                 value=self.minimax(child, depth-1, alfa, beta, child.playerO)
                 if value[1] > longestPath:
                     longestPath = value[1]
-                    bestState = child
+                    worstState = child
                 beta= max(beta, longestPath)
                 if beta >= alfa:
                     break
