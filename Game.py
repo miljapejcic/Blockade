@@ -208,19 +208,9 @@ class Game:
             lists.insert(1, state.A_star(state.playerX,1,state.startPosO2))
             lists.insert(2, state.A_star(state.playerX,2,state.startPosO1))
             lists.insert(3, state.A_star(state.playerX,2,state.startPosO2))
-
-        sizes.insert(0,len(lists[0]) - 1)
-        sizes.insert(1,len(lists[1]) - 1)
-        sizes.insert(2,len(lists[2]) - 1)
-        sizes.insert(3,len(lists[3]) - 1)           
-
-        minimumSize = 1000
-        ind = -1
-        for i in range(0,4):
-            if sizes[i] < minimumSize:
-                minimumSize = sizes[i]
-                ind = i
-        setSvihZidova = self.generateSetOfPossibleWalls(lists[ind])
+        
+        for path in lists:
+            setSvihZidova.update(self.generateSetOfPossibleWalls(path))
         setValidnih = set(filter(lambda wall: state.validateWall(wall[1],list(wall[0])),setSvihZidova))
         return setValidnih
 
@@ -254,6 +244,7 @@ class Game:
     def generateSetOfPossibleWalls(self, put:List[List[int]]):
         
         ePut=self.generateExpandedPath(put)
+        ePut.reverse()
         setOfPossibleWalls=set()
 
         for i in range (0,len(ePut)-1):
@@ -276,6 +267,7 @@ class Game:
                 if xDir == 1 and yDir == 1:
                     setOfPossibleWalls.add((tmp,0))
                     setOfPossibleWalls.add((tmp,1))
+                continue
             if xDir != 0:
                 if xDir == 1:
                     setOfPossibleWalls.add((tmp,0))
@@ -339,7 +331,7 @@ class Game:
             stateClone.addPlayers(playerClone, plO)
         else:
             plX = state.playerX.clone()
-            stateClone.addPlayers(plX, player)
+            stateClone.addPlayers(plX, playerClone)
         stateClone.movePawn(playerClone,pawnNo,nextMove)
             
            
@@ -384,6 +376,7 @@ class Game:
            return [state, self.procenaStanja(state, state.playerO, state.startPosX1, state.startPosX2)]
         # clonedPlayer = player.clone()
         children = self.generateNewStates(player, state)
+       
         if player.sign == 'O': #maximizer
             bestState = state
             shortestPath = 1000
