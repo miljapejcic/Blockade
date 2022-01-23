@@ -99,7 +99,7 @@ class Game:
         if player.hasAnyWalls():
             tmp = self.minimax(self.matrica,2,1000, -1000, player)
         else:
-            tmp = self.minimax(self.matrixInit,3,1000,-1000,player)
+            tmp = self.minimax(self.matrica,3,1000,-1000,player)
         self.matrica = tmp[0]
         
         self.printBoard()
@@ -338,10 +338,10 @@ class Game:
         stateClone.movePawn(playerClone,pawnNo,nextMove)
             
            
-           
         #ako nema zidova    
-        if not player.hasAnyWalls():  
-            return stateClone
+        if not player.hasAnyWalls(): 
+            matriceNewState.append(stateClone) 
+            return matriceNewState
 
        
         def addMatrix(mat: Matrica, i,j,wallType,player, matriceNewState):
