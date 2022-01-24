@@ -413,7 +413,7 @@ class Game:
    
 
     def procenaStanja(self, state:Matrica, player: Player, cilj1: List[int], cilj2: List[int])-> int:
-        dsit =  0
+        dist =  0
         list1 = state.A_star(player,1,cilj1)
         list2 = state.A_star(player,1,cilj2)
         list3 = state.A_star(player,2,cilj1)
